@@ -15,6 +15,13 @@ tasks:
     dir: "frontend"
     cmd: npm run dev
 
+  # -------------- FRONTEND -------------
+  gen-api:
+    desc: "Generate TanStack Query hooks from backend OpenAPI schema (backend must be running)"
+    dir: "frontend"
+    cmd: npx orval
+
+  # -------------- BACKEND --------------
   add-migration:
     desc: "Creates alembic migration of a given name"
     dir: "api"
