@@ -1,0 +1,43 @@
+version: "3"
+
+tasks:
+  dev:
+    desc: "Start backend + frontend locally"
+    deps: [dev:backend, dev:frontend]
+
+  dev:backend:
+    desc: "Start backend locally"
+    dir: "api/src"
+    cmd: uv run uvicorn main:create_app --factory --reload --port 8000
+
+  dev:frontend:
+    desc: "Start frontend locally"
+    dir: "frontend"
+    cmd: npm run dev
+
+  add-migration:
+    desc: "Creates alembic migration of a given name"
+    dir: "api"
+    requires:
+      vars: [NAME]
+    cmd: uv run alembic revision --autogenerate -m "{{.NAME}}"
+
+  migrate:
+    desc: "Executes migration on a specified database"
+    dir: "api"
+    cmd: uv run alembic upgrade head
+
+  secrets-local:
+    desc: "Create/update k8s secrets on the current cluster context from .env.k8s.local"
+    dotenv: [".env.k8s.local"]
+    cmds:
+      - >
+        kubectl create secret generic postgres-secret
+        --from-literal=POSTGRES_USER=$POSTGRES_USER
+        --from-literal=POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+        --from-literal=POSTGRES_DB=$POSTGRES_DB
+        --dry-run=client -o yaml | kubectl apply -f -
+      - >
+        kubectl create secret generic backend-secret
+        --from-literal=DB_URL=postgresql+asyncpg://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB
+        --dry-run=client -o yaml | kubectl apply -f -
