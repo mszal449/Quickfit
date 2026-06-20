@@ -3,3 +3,4 @@ context
 .env
 !.env.example
 !.env.k8s.local.example
+.vscode
