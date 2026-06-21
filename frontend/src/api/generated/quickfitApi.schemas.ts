@@ -5,7 +5,48 @@
  * QuickFit API
  * OpenAPI spec version: 0.1.0
  */
+export interface HTTPValidationError {
+  detail?: ValidationError[];
+}
+
 export interface HealthResponse {
   status: string;
 }
+
+export type UserOutLastLoginAt = string | null;
+
+export interface UserOut {
+  id: string;
+  email: string;
+  role: UserRole;
+  is_email_verified: boolean;
+  created_at: string;
+  last_login_at: UserOutLastLoginAt;
+}
+
+export type UserRole = typeof UserRole[keyof typeof UserRole];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UserRole = {
+  user: 'user',
+  admin: 'admin',
+} as const;
+
+export type ValidationErrorLocItem = string | number;
+
+export type ValidationErrorCtx = { [key: string]: unknown };
+
+export interface ValidationError {
+  loc: ValidationErrorLocItem[];
+  msg: string;
+  type: string;
+  input?: unknown;
+  ctx?: ValidationErrorCtx;
+}
+
+export type GoogleCallbackApiAuthGoogleCallbackGetParams = {
+code: string;
+state: string;
+};
 

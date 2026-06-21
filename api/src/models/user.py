@@ -26,8 +26,12 @@ class User(BaseModel):
 
     identities: Mapped[list["AuthIdentity"]] = relationship(back_populates="user")
     
-    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
     updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
@@ -45,6 +49,9 @@ class AuthIdentity(BaseModel):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)
     provider: Mapped[AuthProvider] = mapped_column(SAEnum(AuthProvider), default=AuthProvider.GOOGLE)
     provider_account_id: Mapped[str] = mapped_column(String(255))
-    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
 
     user: Mapped["User"] = relationship(back_populates="identities")

@@ -30,7 +30,7 @@ spec:
           envFrom:
             - secretRef:
                 name: backend-secret
-          readinessProbe: # TODO: replace with /health
+          readinessProbe:
             httpGet:
               path: /api/health
               port: 8000

@@ -12,7 +12,10 @@ patches:
       - op: add
         path: /spec/ingressClassName
         value: nginx
-  
+      - op: replace
+        path: /spec/rules/0/host
+        value: localhost
+
   - target:
       kind: Deployment
       name: backend
