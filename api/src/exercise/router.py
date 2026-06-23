@@ -36,4 +36,3 @@ async def create_exercise(
     db: DbSession, user_id: CurrentUserId, payload: ExerciseCreate
 ) -> ExerciseOut:
     return await service.create_exercise(db, user_id, payload)
-

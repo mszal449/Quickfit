@@ -13,6 +13,7 @@ def test_access_token_roundtrip():
     assert payload.sub == user_id
     assert payload.type == "access"
 
+
 def test_decode_rejects_garbage():
     with pytest.raises(InvalidTokenError):
         decode_access_token("not-a-real-jwt")

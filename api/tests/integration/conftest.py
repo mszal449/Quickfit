@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import pytest
@@ -11,16 +10,19 @@ from config.service import get_config
 
 ALEMBIC_INI = Path(__file__).resolve().parents[2] / "alembic.ini"
 
+
 @pytest.fixture(scope="session", autouse=True)
 def apply_migrations():
     cfg = Config(str(ALEMBIC_INI))
     command.upgrade(cfg, "head")
+
 
 @pytest_asyncio.fixture(scope="session")
 async def engine():
     eng = create_async_engine(get_config().db_config.db_url, future=True)
     yield eng
     await eng.dispose()
+
 
 @pytest_asyncio.fixture
 async def db_session(engine):
