@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from structlog import get_logger
 
+from common.db import integrity_error_constraint
 from common.exceptions import ConflictError, NotFoundError
 from exercise.schema import ExerciseCreate, ExerciseOut
 from models.exercise import Exercise
@@ -41,8 +42,7 @@ async def create_user_exercise(
         await db.flush()
     except IntegrityError as exc:
         await db.rollback()
-        constraint_name = getattr(exc.orig, "constraint_name", None)
-        if constraint_name != "uq_exercises_owner_name_active":
+        if integrity_error_constraint(exc) != "uq_exercises_owner_name_active":
             raise
         LOG.warning("exercise_name_conflict", owner_id=str(user_id), name=payload.name)
         raise ConflictError(

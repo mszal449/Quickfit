@@ -7,7 +7,7 @@ from structlog import get_logger
 from common.exceptions import NotFoundError
 from models.exercise import Exercise
 from models.plan_session import PlanSession
-from plan.service import get_plan
+from plan.service import get_owned_plan, get_plan
 from plan_session.prescription import SessionPrescription
 from plan_session.schema import PlanSessionCreate, PlanSessionOut
 
@@ -25,7 +25,7 @@ async def list_plan_sessions(
 async def create_plan_session(
     db: AsyncSession, plan_id: UUID, user_id: UUID, payload: PlanSessionCreate
 ) -> PlanSessionOut:
-    await get_plan(db, plan_id, user_id)
+    await get_owned_plan(db, plan_id, user_id)
     await _exercises_exist(db, payload.prescription)
     session = PlanSession(
         plan_id=plan_id,
@@ -56,7 +56,7 @@ async def get_plan_session(
 async def delete_plan_session(
     db: AsyncSession, plan_id: UUID, plan_session_id: UUID, user_id: UUID
 ) -> None:
-    await get_plan(db, plan_id, user_id)
+    await get_owned_plan(db, plan_id, user_id)
     result = await db.execute(
         delete(PlanSession).where(PlanSession.id == plan_session_id, PlanSession.plan_id == plan_id)
     )

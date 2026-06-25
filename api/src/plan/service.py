@@ -48,6 +48,15 @@ async def get_plan(db: AsyncSession, plan_id: UUID, user_id: UUID) -> PlanOut:
     return PlanOut.model_validate(plan)
 
 
+async def get_owned_plan(db: AsyncSession, plan_id: UUID, user_id: UUID) -> PlanOut:
+    req = await db.execute(select(Plan).where(Plan.id == plan_id, Plan.owner_id == user_id))
+    plan = req.scalar_one_or_none()
+    if plan is None:
+        LOG.warning("plan_not_found", plan_id=str(plan_id), user_id=str(user_id))
+        raise NotFoundError("Plan not found")
+    return PlanOut.model_validate(plan)
+
+
 async def create_plan(db: AsyncSession, user_id: UUID, plan: PlanCreate) -> PlanOut:
     new_plan = Plan(
         owner_id=user_id, name=plan.name, description=plan.description, visibility=plan.visibility
