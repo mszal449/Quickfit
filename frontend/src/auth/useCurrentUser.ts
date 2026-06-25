@@ -1,7 +1,7 @@
-import { useMeApiAuthMeGet } from "../api/generated/auth/auth";
+import { useMeGet } from "../api/generated/auth/auth";
 
 export function useCurrentUser() {
-  return useMeApiAuthMeGet({
+  return useMeGet({
     query: {
       staleTime: Infinity,
       retry: false,

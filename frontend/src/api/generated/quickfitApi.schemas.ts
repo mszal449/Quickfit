@@ -25,6 +25,23 @@ export interface ExerciseOut {
   description: ExerciseOutDescription;
 }
 
+/**
+ * Description
+ */
+export type ExercisePrescriptionDescription = string | null;
+
+export interface ExercisePrescription {
+  /** Exercise ID */
+  exercise_id: string;
+  /**
+   * Sets of the given exercise
+   * @minItems 1
+   */
+  sets: SetPrescription[];
+  /** Description */
+  description?: ExercisePrescriptionDescription;
+}
+
 export interface HTTPValidationError {
   detail?: ValidationError[];
 }
@@ -36,8 +53,79 @@ export interface HealthResponse {
 export interface PageExerciseOut {
   items: ExerciseOut[];
   total: number;
-  limit: number;
-  offset: number;
+}
+
+export interface PagePlanOut {
+  items: PlanOut[];
+  total: number;
+}
+
+export interface PagePlanSessionOut {
+  items: PlanSessionOut[];
+  total: number;
+}
+
+export type PlanCreateDescription = string | null;
+
+export interface PlanCreate {
+  name: string;
+  description: PlanCreateDescription;
+  visibility?: PlanVisibility;
+}
+
+export type PlanOutDescription = string | null;
+
+export interface PlanOut {
+  id: string;
+  owner_id: string;
+  name: string;
+  description: PlanOutDescription;
+  visibility: PlanVisibility;
+}
+
+export interface PlanSessionCreate {
+  name: string;
+  prescription: SessionPrescription;
+}
+
+export interface PlanSessionOut {
+  id: string;
+  plan_id: string;
+  name: string;
+  prescription: SessionPrescription;
+  schema_version: number;
+}
+
+export type PlanVisibility = typeof PlanVisibility[keyof typeof PlanVisibility];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PlanVisibility = {
+  private: 'private',
+  shared: 'shared',
+} as const;
+
+export interface SessionPrescription {
+  /**
+   * Workout exercises
+   * @minItems 1
+   */
+  exercises: ExercisePrescription[];
+}
+
+/**
+ * Upper bound of the rep range
+ */
+export type SetPrescriptionMaxReps = number | null;
+
+export interface SetPrescription {
+  /**
+   * Mininum or target rep count
+   * @minimum 0
+   */
+  min_reps: number;
+  /** Upper bound of the rep range */
+  max_reps?: SetPrescriptionMaxReps;
 }
 
 export type UserOutLastLoginAt = string | null;
@@ -72,20 +160,19 @@ export interface ValidationError {
   ctx?: ValidationErrorCtx;
 }
 
-export type GoogleCallbackApiAuthGoogleCallbackGetParams = {
+export type GoogleCallbackGetParams = {
 code: string;
 state: string;
 };
 
-export type ListExercisesApiExerciseGetParams = {
+export type GetPlansGetParams = {
 /**
- * @minimum 1
- * @maximum 100
+ * If True, returns plans shared with the authenticated user
  */
-limit?: number;
+shared_with_me?: boolean;
 /**
- * @minimum 0
+ * Filters plans shared with authenticated user
  */
-offset?: number;
+shared_by_user_id?: string | null;
 };
 

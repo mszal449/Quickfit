@@ -28,7 +28,6 @@ import type {
   ExerciseCreate,
   ExerciseOut,
   HTTPValidationError,
-  ListExercisesApiExerciseGetParams,
   PageExerciseOut
 } from '../quickfitApi.schemas';
 
@@ -40,17 +39,16 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
- * @summary List Exercises
+ * @summary Get Exercises
  */
-export const listExercisesApiExerciseGet = (
-    params?: ListExercisesApiExerciseGetParams,
+export const getExercisesGet = (
+    
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
       
       
       return customFetch<PageExerciseOut>(
-      {url: `/api/exercise`, method: 'GET',
-        params, signal
+      {url: `/api/exercise`, method: 'GET', signal
     },
       options);
     }
@@ -58,69 +56,69 @@ export const listExercisesApiExerciseGet = (
 
 
 
-export const getListExercisesApiExerciseGetQueryKey = (params?: ListExercisesApiExerciseGetParams,) => {
+export const getGetExercisesGetQueryKey = () => {
     return [
-    `/api/exercise`, ...(params ? [params]: [])
+    `/api/exercise`
     ] as const;
     }
 
     
-export const getListExercisesApiExerciseGetQueryOptions = <TData = Awaited<ReturnType<typeof listExercisesApiExerciseGet>>, TError = HTTPValidationError>(params?: ListExercisesApiExerciseGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExercisesApiExerciseGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetExercisesGetQueryOptions = <TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListExercisesApiExerciseGetQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetExercisesGetQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listExercisesApiExerciseGet>>> = ({ signal }) => listExercisesApiExerciseGet(params, requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExercisesGet>>> = ({ signal }) => getExercisesGet(requestOptions, signal);
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listExercisesApiExerciseGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type ListExercisesApiExerciseGetQueryResult = NonNullable<Awaited<ReturnType<typeof listExercisesApiExerciseGet>>>
-export type ListExercisesApiExerciseGetQueryError = HTTPValidationError
+export type GetExercisesGetQueryResult = NonNullable<Awaited<ReturnType<typeof getExercisesGet>>>
+export type GetExercisesGetQueryError = unknown
 
 
-export function useListExercisesApiExerciseGet<TData = Awaited<ReturnType<typeof listExercisesApiExerciseGet>>, TError = HTTPValidationError>(
- params: undefined |  ListExercisesApiExerciseGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExercisesApiExerciseGet>>, TError, TData>> & Pick<
+export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listExercisesApiExerciseGet>>,
+          Awaited<ReturnType<typeof getExercisesGet>>,
           TError,
-          Awaited<ReturnType<typeof listExercisesApiExerciseGet>>
+          Awaited<ReturnType<typeof getExercisesGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListExercisesApiExerciseGet<TData = Awaited<ReturnType<typeof listExercisesApiExerciseGet>>, TError = HTTPValidationError>(
- params?: ListExercisesApiExerciseGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExercisesApiExerciseGet>>, TError, TData>> & Pick<
+export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listExercisesApiExerciseGet>>,
+          Awaited<ReturnType<typeof getExercisesGet>>,
           TError,
-          Awaited<ReturnType<typeof listExercisesApiExerciseGet>>
+          Awaited<ReturnType<typeof getExercisesGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListExercisesApiExerciseGet<TData = Awaited<ReturnType<typeof listExercisesApiExerciseGet>>, TError = HTTPValidationError>(
- params?: ListExercisesApiExerciseGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExercisesApiExerciseGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary List Exercises
+ * @summary Get Exercises
  */
 
-export function useListExercisesApiExerciseGet<TData = Awaited<ReturnType<typeof listExercisesApiExerciseGet>>, TError = HTTPValidationError>(
- params?: ListExercisesApiExerciseGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExercisesApiExerciseGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListExercisesApiExerciseGetQueryOptions(params,options)
+  const queryOptions = getGetExercisesGetQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -135,7 +133,7 @@ export function useListExercisesApiExerciseGet<TData = Awaited<ReturnType<typeof
 /**
  * @summary Create Exercise
  */
-export const createExerciseApiExercisePost = (
+export const createExercisePost = (
     exerciseCreate: ExerciseCreate,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
@@ -151,11 +149,11 @@ export const createExerciseApiExercisePost = (
   
 
 
-export const getCreateExerciseApiExercisePostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExerciseApiExercisePost>>, TError,{data: ExerciseCreate}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createExerciseApiExercisePost>>, TError,{data: ExerciseCreate}, TContext> => {
+export const getCreateExercisePostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExercisePost>>, TError,{data: ExerciseCreate}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createExercisePost>>, TError,{data: ExerciseCreate}, TContext> => {
 
-const mutationKey = ['createExerciseApiExercisePost'];
+const mutationKey = ['createExercisePost'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -165,10 +163,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createExerciseApiExercisePost>>, {data: ExerciseCreate}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createExercisePost>>, {data: ExerciseCreate}> = (props) => {
           const {data} = props ?? {};
 
-          return  createExerciseApiExercisePost(data,requestOptions)
+          return  createExercisePost(data,requestOptions)
         }
 
         
@@ -176,30 +174,30 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateExerciseApiExercisePostMutationResult = NonNullable<Awaited<ReturnType<typeof createExerciseApiExercisePost>>>
-    export type CreateExerciseApiExercisePostMutationBody = ExerciseCreate
-    export type CreateExerciseApiExercisePostMutationError = HTTPValidationError
+    export type CreateExercisePostMutationResult = NonNullable<Awaited<ReturnType<typeof createExercisePost>>>
+    export type CreateExercisePostMutationBody = ExerciseCreate
+    export type CreateExercisePostMutationError = HTTPValidationError
 
     /**
  * @summary Create Exercise
  */
-export const useCreateExerciseApiExercisePost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExerciseApiExercisePost>>, TError,{data: ExerciseCreate}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useCreateExercisePost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExercisePost>>, TError,{data: ExerciseCreate}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createExerciseApiExercisePost>>,
+        Awaited<ReturnType<typeof createExercisePost>>,
         TError,
         {data: ExerciseCreate},
         TContext
       > => {
 
-      const mutationOptions = getCreateExerciseApiExercisePostMutationOptions(options);
+      const mutationOptions = getCreateExercisePostMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
     /**
  * @summary Get Exercise
  */
-export const getExerciseApiExerciseExerciseIdGet = (
+export const getExerciseGet = (
     exerciseId: string,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
@@ -214,69 +212,69 @@ export const getExerciseApiExerciseExerciseIdGet = (
 
 
 
-export const getGetExerciseApiExerciseExerciseIdGetQueryKey = (exerciseId?: string,) => {
+export const getGetExerciseGetQueryKey = (exerciseId?: string,) => {
     return [
     `/api/exercise/${exerciseId}`
     ] as const;
     }
 
     
-export const getGetExerciseApiExerciseExerciseIdGetQueryOptions = <TData = Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>, TError = HTTPValidationError>(exerciseId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetExerciseGetQueryOptions = <TData = Awaited<ReturnType<typeof getExerciseGet>>, TError = HTTPValidationError>(exerciseId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExerciseGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetExerciseApiExerciseExerciseIdGetQueryKey(exerciseId);
+  const queryKey =  queryOptions?.queryKey ?? getGetExerciseGetQueryKey(exerciseId);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>> = ({ signal }) => getExerciseApiExerciseExerciseIdGet(exerciseId, requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExerciseGet>>> = ({ signal }) => getExerciseGet(exerciseId, requestOptions, signal);
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(exerciseId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(exerciseId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExerciseGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetExerciseApiExerciseExerciseIdGetQueryResult = NonNullable<Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>>
-export type GetExerciseApiExerciseExerciseIdGetQueryError = HTTPValidationError
+export type GetExerciseGetQueryResult = NonNullable<Awaited<ReturnType<typeof getExerciseGet>>>
+export type GetExerciseGetQueryError = HTTPValidationError
 
 
-export function useGetExerciseApiExerciseExerciseIdGet<TData = Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>, TError = HTTPValidationError>(
- exerciseId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>, TError, TData>> & Pick<
+export function useGetExerciseGet<TData = Awaited<ReturnType<typeof getExerciseGet>>, TError = HTTPValidationError>(
+ exerciseId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExerciseGet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>,
+          Awaited<ReturnType<typeof getExerciseGet>>,
           TError,
-          Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>
+          Awaited<ReturnType<typeof getExerciseGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetExerciseApiExerciseExerciseIdGet<TData = Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>, TError = HTTPValidationError>(
- exerciseId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>, TError, TData>> & Pick<
+export function useGetExerciseGet<TData = Awaited<ReturnType<typeof getExerciseGet>>, TError = HTTPValidationError>(
+ exerciseId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExerciseGet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>,
+          Awaited<ReturnType<typeof getExerciseGet>>,
           TError,
-          Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>
+          Awaited<ReturnType<typeof getExerciseGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetExerciseApiExerciseExerciseIdGet<TData = Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>, TError = HTTPValidationError>(
- exerciseId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetExerciseGet<TData = Awaited<ReturnType<typeof getExerciseGet>>, TError = HTTPValidationError>(
+ exerciseId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExerciseGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get Exercise
  */
 
-export function useGetExerciseApiExerciseExerciseIdGet<TData = Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>, TError = HTTPValidationError>(
- exerciseId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExerciseApiExerciseExerciseIdGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetExerciseGet<TData = Awaited<ReturnType<typeof getExerciseGet>>, TError = HTTPValidationError>(
+ exerciseId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExerciseGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetExerciseApiExerciseExerciseIdGetQueryOptions(exerciseId,options)
+  const queryOptions = getGetExerciseGetQueryOptions(exerciseId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -288,3 +286,65 @@ export function useGetExerciseApiExerciseExerciseIdGet<TData = Awaited<ReturnTyp
 
 
 
+/**
+ * @summary Delete Exercise
+ */
+export const deleteExerciseDelete = (
+    exerciseId: string,
+ options?: SecondParameter<typeof customFetch>,) => {
+      
+      
+      return customFetch<void>(
+      {url: `/api/exercise/${exerciseId}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getDeleteExerciseDeleteMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExerciseDelete>>, TError,{exerciseId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteExerciseDelete>>, TError,{exerciseId: string}, TContext> => {
+
+const mutationKey = ['deleteExerciseDelete'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteExerciseDelete>>, {exerciseId: string}> = (props) => {
+          const {exerciseId} = props ?? {};
+
+          return  deleteExerciseDelete(exerciseId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteExerciseDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof deleteExerciseDelete>>>
+    
+    export type DeleteExerciseDeleteMutationError = HTTPValidationError
+
+    /**
+ * @summary Delete Exercise
+ */
+export const useDeleteExerciseDelete = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExerciseDelete>>, TError,{exerciseId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteExerciseDelete>>,
+        TError,
+        {exerciseId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getDeleteExerciseDeleteMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    

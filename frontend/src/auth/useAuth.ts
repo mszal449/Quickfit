@@ -1,10 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useLogoutApiAuthLogoutPost } from "../api/generated/auth/auth";
+import { useLogoutPost } from "../api/generated/auth/auth";
 
 export function useAuth() {
   const queryClient = useQueryClient();
 
-  const logoutMutation = useLogoutApiAuthLogoutPost({
+  const logoutMutation = useLogoutPost({
     mutation: {
       onSuccess: () => {
         queryClient.clear();

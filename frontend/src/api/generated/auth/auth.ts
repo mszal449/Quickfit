@@ -25,7 +25,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  GoogleCallbackApiAuthGoogleCallbackGetParams,
+  GoogleCallbackGetParams,
   HTTPValidationError,
   UserOut
 } from '../quickfitApi.schemas';
@@ -40,7 +40,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 /**
  * @summary Me
  */
-export const meApiAuthMeGet = (
+export const meGet = (
     
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
@@ -55,69 +55,69 @@ export const meApiAuthMeGet = (
 
 
 
-export const getMeApiAuthMeGetQueryKey = () => {
+export const getMeGetQueryKey = () => {
     return [
     `/api/auth/me`
     ] as const;
     }
 
     
-export const getMeApiAuthMeGetQueryOptions = <TData = Awaited<ReturnType<typeof meApiAuthMeGet>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof meApiAuthMeGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getMeGetQueryOptions = <TData = Awaited<ReturnType<typeof meGet>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof meGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getMeApiAuthMeGetQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getMeGetQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof meApiAuthMeGet>>> = ({ signal }) => meApiAuthMeGet(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof meGet>>> = ({ signal }) => meGet(requestOptions, signal);
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof meApiAuthMeGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof meGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type MeApiAuthMeGetQueryResult = NonNullable<Awaited<ReturnType<typeof meApiAuthMeGet>>>
-export type MeApiAuthMeGetQueryError = unknown
+export type MeGetQueryResult = NonNullable<Awaited<ReturnType<typeof meGet>>>
+export type MeGetQueryError = unknown
 
 
-export function useMeApiAuthMeGet<TData = Awaited<ReturnType<typeof meApiAuthMeGet>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof meApiAuthMeGet>>, TError, TData>> & Pick<
+export function useMeGet<TData = Awaited<ReturnType<typeof meGet>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof meGet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof meApiAuthMeGet>>,
+          Awaited<ReturnType<typeof meGet>>,
           TError,
-          Awaited<ReturnType<typeof meApiAuthMeGet>>
+          Awaited<ReturnType<typeof meGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMeApiAuthMeGet<TData = Awaited<ReturnType<typeof meApiAuthMeGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof meApiAuthMeGet>>, TError, TData>> & Pick<
+export function useMeGet<TData = Awaited<ReturnType<typeof meGet>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof meGet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof meApiAuthMeGet>>,
+          Awaited<ReturnType<typeof meGet>>,
           TError,
-          Awaited<ReturnType<typeof meApiAuthMeGet>>
+          Awaited<ReturnType<typeof meGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMeApiAuthMeGet<TData = Awaited<ReturnType<typeof meApiAuthMeGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof meApiAuthMeGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useMeGet<TData = Awaited<ReturnType<typeof meGet>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof meGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Me
  */
 
-export function useMeApiAuthMeGet<TData = Awaited<ReturnType<typeof meApiAuthMeGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof meApiAuthMeGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useMeGet<TData = Awaited<ReturnType<typeof meGet>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof meGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getMeApiAuthMeGetQueryOptions(options)
+  const queryOptions = getMeGetQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -132,7 +132,7 @@ export function useMeApiAuthMeGet<TData = Awaited<ReturnType<typeof meApiAuthMeG
 /**
  * @summary Google Login
  */
-export const googleLoginApiAuthGoogleLoginGet = (
+export const googleLoginGet = (
     
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
@@ -147,69 +147,69 @@ export const googleLoginApiAuthGoogleLoginGet = (
 
 
 
-export const getGoogleLoginApiAuthGoogleLoginGetQueryKey = () => {
+export const getGoogleLoginGetQueryKey = () => {
     return [
     `/api/auth/google/login`
     ] as const;
     }
 
     
-export const getGoogleLoginApiAuthGoogleLoginGetQueryOptions = <TData = Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGoogleLoginGetQueryOptions = <TData = Awaited<ReturnType<typeof googleLoginGet>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleLoginGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGoogleLoginApiAuthGoogleLoginGetQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGoogleLoginGetQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>> = ({ signal }) => googleLoginApiAuthGoogleLoginGet(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof googleLoginGet>>> = ({ signal }) => googleLoginGet(requestOptions, signal);
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof googleLoginGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GoogleLoginApiAuthGoogleLoginGetQueryResult = NonNullable<Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>>
-export type GoogleLoginApiAuthGoogleLoginGetQueryError = unknown
+export type GoogleLoginGetQueryResult = NonNullable<Awaited<ReturnType<typeof googleLoginGet>>>
+export type GoogleLoginGetQueryError = unknown
 
 
-export function useGoogleLoginApiAuthGoogleLoginGet<TData = Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>, TError, TData>> & Pick<
+export function useGoogleLoginGet<TData = Awaited<ReturnType<typeof googleLoginGet>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleLoginGet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>,
+          Awaited<ReturnType<typeof googleLoginGet>>,
           TError,
-          Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>
+          Awaited<ReturnType<typeof googleLoginGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGoogleLoginApiAuthGoogleLoginGet<TData = Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>, TError, TData>> & Pick<
+export function useGoogleLoginGet<TData = Awaited<ReturnType<typeof googleLoginGet>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleLoginGet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>,
+          Awaited<ReturnType<typeof googleLoginGet>>,
           TError,
-          Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>
+          Awaited<ReturnType<typeof googleLoginGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGoogleLoginApiAuthGoogleLoginGet<TData = Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGoogleLoginGet<TData = Awaited<ReturnType<typeof googleLoginGet>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleLoginGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Google Login
  */
 
-export function useGoogleLoginApiAuthGoogleLoginGet<TData = Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleLoginApiAuthGoogleLoginGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGoogleLoginGet<TData = Awaited<ReturnType<typeof googleLoginGet>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleLoginGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGoogleLoginApiAuthGoogleLoginGetQueryOptions(options)
+  const queryOptions = getGoogleLoginGetQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -224,8 +224,8 @@ export function useGoogleLoginApiAuthGoogleLoginGet<TData = Awaited<ReturnType<t
 /**
  * @summary Google Callback
  */
-export const googleCallbackApiAuthGoogleCallbackGet = (
-    params: GoogleCallbackApiAuthGoogleCallbackGetParams,
+export const googleCallbackGet = (
+    params: GoogleCallbackGetParams,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
       
@@ -240,69 +240,69 @@ export const googleCallbackApiAuthGoogleCallbackGet = (
 
 
 
-export const getGoogleCallbackApiAuthGoogleCallbackGetQueryKey = (params?: GoogleCallbackApiAuthGoogleCallbackGetParams,) => {
+export const getGoogleCallbackGetQueryKey = (params?: GoogleCallbackGetParams,) => {
     return [
     `/api/auth/google/callback`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getGoogleCallbackApiAuthGoogleCallbackGetQueryOptions = <TData = Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>, TError = HTTPValidationError>(params: GoogleCallbackApiAuthGoogleCallbackGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGoogleCallbackGetQueryOptions = <TData = Awaited<ReturnType<typeof googleCallbackGet>>, TError = HTTPValidationError>(params: GoogleCallbackGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleCallbackGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGoogleCallbackApiAuthGoogleCallbackGetQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGoogleCallbackGetQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>> = ({ signal }) => googleCallbackApiAuthGoogleCallbackGet(params, requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof googleCallbackGet>>> = ({ signal }) => googleCallbackGet(params, requestOptions, signal);
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof googleCallbackGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GoogleCallbackApiAuthGoogleCallbackGetQueryResult = NonNullable<Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>>
-export type GoogleCallbackApiAuthGoogleCallbackGetQueryError = HTTPValidationError
+export type GoogleCallbackGetQueryResult = NonNullable<Awaited<ReturnType<typeof googleCallbackGet>>>
+export type GoogleCallbackGetQueryError = HTTPValidationError
 
 
-export function useGoogleCallbackApiAuthGoogleCallbackGet<TData = Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>, TError = HTTPValidationError>(
- params: GoogleCallbackApiAuthGoogleCallbackGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>, TError, TData>> & Pick<
+export function useGoogleCallbackGet<TData = Awaited<ReturnType<typeof googleCallbackGet>>, TError = HTTPValidationError>(
+ params: GoogleCallbackGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleCallbackGet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>,
+          Awaited<ReturnType<typeof googleCallbackGet>>,
           TError,
-          Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>
+          Awaited<ReturnType<typeof googleCallbackGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGoogleCallbackApiAuthGoogleCallbackGet<TData = Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>, TError = HTTPValidationError>(
- params: GoogleCallbackApiAuthGoogleCallbackGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>, TError, TData>> & Pick<
+export function useGoogleCallbackGet<TData = Awaited<ReturnType<typeof googleCallbackGet>>, TError = HTTPValidationError>(
+ params: GoogleCallbackGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleCallbackGet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>,
+          Awaited<ReturnType<typeof googleCallbackGet>>,
           TError,
-          Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>
+          Awaited<ReturnType<typeof googleCallbackGet>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGoogleCallbackApiAuthGoogleCallbackGet<TData = Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>, TError = HTTPValidationError>(
- params: GoogleCallbackApiAuthGoogleCallbackGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGoogleCallbackGet<TData = Awaited<ReturnType<typeof googleCallbackGet>>, TError = HTTPValidationError>(
+ params: GoogleCallbackGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleCallbackGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Google Callback
  */
 
-export function useGoogleCallbackApiAuthGoogleCallbackGet<TData = Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>, TError = HTTPValidationError>(
- params: GoogleCallbackApiAuthGoogleCallbackGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleCallbackApiAuthGoogleCallbackGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGoogleCallbackGet<TData = Awaited<ReturnType<typeof googleCallbackGet>>, TError = HTTPValidationError>(
+ params: GoogleCallbackGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof googleCallbackGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGoogleCallbackApiAuthGoogleCallbackGetQueryOptions(params,options)
+  const queryOptions = getGoogleCallbackGetQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -317,7 +317,7 @@ export function useGoogleCallbackApiAuthGoogleCallbackGet<TData = Awaited<Return
 /**
  * @summary Refresh
  */
-export const refreshApiAuthRefreshPost = (
+export const refreshPost = (
     
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
@@ -331,11 +331,11 @@ export const refreshApiAuthRefreshPost = (
   
 
 
-export const getRefreshApiAuthRefreshPostMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshApiAuthRefreshPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof refreshApiAuthRefreshPost>>, TError,void, TContext> => {
+export const getRefreshPostMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof refreshPost>>, TError,void, TContext> => {
 
-const mutationKey = ['refreshApiAuthRefreshPost'];
+const mutationKey = ['refreshPost'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -345,10 +345,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshApiAuthRefreshPost>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshPost>>, void> = () => {
           
 
-          return  refreshApiAuthRefreshPost(requestOptions)
+          return  refreshPost(requestOptions)
         }
 
         
@@ -356,30 +356,30 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type RefreshApiAuthRefreshPostMutationResult = NonNullable<Awaited<ReturnType<typeof refreshApiAuthRefreshPost>>>
+    export type RefreshPostMutationResult = NonNullable<Awaited<ReturnType<typeof refreshPost>>>
     
-    export type RefreshApiAuthRefreshPostMutationError = unknown
+    export type RefreshPostMutationError = unknown
 
     /**
  * @summary Refresh
  */
-export const useRefreshApiAuthRefreshPost = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshApiAuthRefreshPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useRefreshPost = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof refreshApiAuthRefreshPost>>,
+        Awaited<ReturnType<typeof refreshPost>>,
         TError,
         void,
         TContext
       > => {
 
-      const mutationOptions = getRefreshApiAuthRefreshPostMutationOptions(options);
+      const mutationOptions = getRefreshPostMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
     /**
  * @summary Logout
  */
-export const logoutApiAuthLogoutPost = (
+export const logoutPost = (
     
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
@@ -393,11 +393,11 @@ export const logoutApiAuthLogoutPost = (
   
 
 
-export const getLogoutApiAuthLogoutPostMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutApiAuthLogoutPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof logoutApiAuthLogoutPost>>, TError,void, TContext> => {
+export const getLogoutPostMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof logoutPost>>, TError,void, TContext> => {
 
-const mutationKey = ['logoutApiAuthLogoutPost'];
+const mutationKey = ['logoutPost'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -407,10 +407,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutApiAuthLogoutPost>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutPost>>, void> = () => {
           
 
-          return  logoutApiAuthLogoutPost(requestOptions)
+          return  logoutPost(requestOptions)
         }
 
         
@@ -418,30 +418,30 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type LogoutApiAuthLogoutPostMutationResult = NonNullable<Awaited<ReturnType<typeof logoutApiAuthLogoutPost>>>
+    export type LogoutPostMutationResult = NonNullable<Awaited<ReturnType<typeof logoutPost>>>
     
-    export type LogoutApiAuthLogoutPostMutationError = unknown
+    export type LogoutPostMutationError = unknown
 
     /**
  * @summary Logout
  */
-export const useLogoutApiAuthLogoutPost = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutApiAuthLogoutPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useLogoutPost = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof logoutApiAuthLogoutPost>>,
+        Awaited<ReturnType<typeof logoutPost>>,
         TError,
         void,
         TContext
       > => {
 
-      const mutationOptions = getLogoutApiAuthLogoutPostMutationOptions(options);
+      const mutationOptions = getLogoutPostMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
     /**
  * @summary Logout All
  */
-export const logoutAllApiAuthLogoutAllPost = (
+export const logoutAllPost = (
     
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
@@ -455,11 +455,11 @@ export const logoutAllApiAuthLogoutAllPost = (
   
 
 
-export const getLogoutAllApiAuthLogoutAllPostMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAllApiAuthLogoutAllPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof logoutAllApiAuthLogoutAllPost>>, TError,void, TContext> => {
+export const getLogoutAllPostMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAllPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof logoutAllPost>>, TError,void, TContext> => {
 
-const mutationKey = ['logoutAllApiAuthLogoutAllPost'];
+const mutationKey = ['logoutAllPost'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -469,10 +469,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutAllApiAuthLogoutAllPost>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutAllPost>>, void> = () => {
           
 
-          return  logoutAllApiAuthLogoutAllPost(requestOptions)
+          return  logoutAllPost(requestOptions)
         }
 
         
@@ -480,23 +480,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type LogoutAllApiAuthLogoutAllPostMutationResult = NonNullable<Awaited<ReturnType<typeof logoutAllApiAuthLogoutAllPost>>>
+    export type LogoutAllPostMutationResult = NonNullable<Awaited<ReturnType<typeof logoutAllPost>>>
     
-    export type LogoutAllApiAuthLogoutAllPostMutationError = unknown
+    export type LogoutAllPostMutationError = unknown
 
     /**
  * @summary Logout All
  */
-export const useLogoutAllApiAuthLogoutAllPost = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAllApiAuthLogoutAllPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useLogoutAllPost = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAllPost>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof logoutAllApiAuthLogoutAllPost>>,
+        Awaited<ReturnType<typeof logoutAllPost>>,
         TError,
         void,
         TContext
       > => {
 
-      const mutationOptions = getLogoutAllApiAuthLogoutAllPostMutationOptions(options);
+      const mutationOptions = getLogoutAllPostMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

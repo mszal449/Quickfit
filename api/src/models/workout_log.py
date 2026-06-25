@@ -27,5 +27,7 @@ class WorkoutLog(BaseModel):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     sets: Mapped[list["SetLog"]] = relationship(
-        back_populates="workout_log", cascade="all, delete-orphan", order_by="SetLog.set_index"
+        back_populates="workout_log",
+        cascade="all, delete-orphan",
+        order_by="(SetLog.exercise_id, SetLog.set_index)",
     )

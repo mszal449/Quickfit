@@ -1,7 +1,7 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from models.model_base import BaseModel
@@ -9,9 +9,17 @@ from models.model_base import BaseModel
 
 class Exercise(BaseModel):
     __tablename__ = "exercises"
-    __table_args__ = (UniqueConstraint("owner_id", "name"),)
+    __table_args__ = (
+        Index(
+            "uq_exercises_owner_name_active",
+            "owner_id",
+            "name",
+            unique=True,
+            postgresql_where=text("is_archived = false"),
+        ),
+    )
 
-    # NULL = ćwiczenie globalne/wbudowane; inaczej własne danego użytkownika
+    # NULL = global exercise
     owner_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id"), index=True, nullable=True
     )

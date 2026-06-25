@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import APIRouter, FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
 from structlog import get_logger
 
 from auth import router as auth_router
@@ -16,6 +17,16 @@ from plan import router as plan_router
 from plan_session import router as plan_session_router
 
 LOG = get_logger()
+
+
+def custom_operation_id(route: APIRoute) -> str:
+    # OpenAPI operationId = "<handler_name>_<method>" so the generated frontend
+    # client gets hook names like useGetPlansGet / useCreateSessionPost instead
+    # of the default path-mangled mess. Handler names must be unique per method.
+    methods = (route.methods or set()) - {"HEAD", "OPTIONS"}
+    method = sorted(methods)[0].lower() if methods else "get"
+    return f"{route.name}_{method}"
+
 
 _STATUS_BY_EXCEPTION: dict[type[AppError], int] = {
     NotFoundError: status.HTTP_404_NOT_FOUND,
@@ -33,7 +44,10 @@ async def lifespan(app: FastAPI):
 
 async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
     code = _STATUS_BY_EXCEPTION.get(type(exc), status.HTTP_400_BAD_REQUEST)
-    return JSONResponse(status_code=code, content={"detail": str(exc)})
+    content: dict = {"detail": str(exc)}
+    if exc.extra:
+        content["extra"] = exc.extra
+    return JSONResponse(status_code=code, content=content)
 
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
@@ -53,6 +67,7 @@ def create_app():
         debug=cfg.debug,
         openapi_url="/api/openapi.json",
         docs_url="/api/docs",
+        generate_unique_id_function=custom_operation_id,
     )
 
     app.add_exception_handler(AppError, app_error_handler)  # type: ignore[arg-type]

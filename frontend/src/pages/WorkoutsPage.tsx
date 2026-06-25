@@ -1,10 +1,10 @@
 import { useCurrentUser } from "../auth/useCurrentUser";
 import { useAuth } from "../auth/useAuth";
-import { useListExercisesApiExerciseGet } from "../api/generated/exercise/exercise";
+import { useGetExercisesGet } from "../api/generated/exercise/exercise";
 
 const WorkoutsPage = () => {
   const { data: user } = useCurrentUser();
-  const { data: exercises, isLoading } = useListExercisesApiExerciseGet();
+  const { data: exercises, isLoading } = useGetExercisesGet();
   const { logout } = useAuth();
 
   return (

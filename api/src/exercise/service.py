@@ -1,10 +1,11 @@
 from uuid import UUID
 
 from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from structlog import get_logger
 
-from common.exceptions import NotFoundError
+from common.exceptions import ConflictError, NotFoundError
 from exercise.schema import ExerciseCreate, ExerciseOut
 from models.exercise import Exercise
 
@@ -36,7 +37,18 @@ async def create_user_exercise(
 ) -> ExerciseOut:
     exercise = Exercise(owner_id=user_id, name=payload.name, description=payload.description)
     db.add(exercise)
-    await db.flush()
+    try:
+        await db.flush()
+    except IntegrityError as exc:
+        await db.rollback()
+        constraint_name = getattr(exc.orig, "constraint_name", None)
+        if constraint_name != "uq_exercises_owner_name_active":
+            raise
+        LOG.warning("exercise_name_conflict", owner_id=str(user_id), name=payload.name)
+        raise ConflictError(
+            "Exercise with this name already exists",
+            extra={"name": payload.name},
+        ) from None
     await db.refresh(exercise)
     LOG.info("exercise_created", exercise_id=str(exercise.id), owner_id=str(user_id))
     return ExerciseOut.model_validate(exercise)
