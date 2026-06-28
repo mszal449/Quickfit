@@ -7,7 +7,7 @@ import { useLiveSession } from "./useLiveSession";
 import { useSetMutations } from "./useSetMutations";
 import { useWorkoutLogActions } from "./useWorkoutLogActions";
 import { useRestTimer } from "./useRestTimer";
-import { useToast } from "../../components/ui/Toast";
+import { useToast } from "../../components/ui/useToast";
 import { SessionTopBar } from "./components/SessionTopBar";
 import { SetsTable } from "./components/SetsTable";
 import { LogSetWidget } from "./components/LogSetWidget";

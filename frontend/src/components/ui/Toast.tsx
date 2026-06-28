@@ -1,28 +1,13 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "../../lib/cn";
-
-type Tone = "error" | "success" | "info";
+import { ToastContext, type ToastApi, type Tone } from "./toastContext";
 
 interface ToastItem {
   id: number;
   message: string;
   tone: Tone;
 }
-
-interface ToastApi {
-  show: (message: string, tone?: Tone) => void;
-  error: (message: string) => void;
-  success: (message: string) => void;
-}
-
-const ToastContext = createContext<ToastApi | null>(null);
 
 const dotTones: Record<Tone, string> = {
   error: "bg-danger",
@@ -86,10 +71,4 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <style>{`@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}`}</style>
     </ToastContext.Provider>
   );
-}
-
-export function useToast(): ToastApi {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error("useToast must be used within ToastProvider");
-  return ctx;
 }

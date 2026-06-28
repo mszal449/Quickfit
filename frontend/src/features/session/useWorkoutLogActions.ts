@@ -5,7 +5,7 @@ import {
   useUpdateWorkoutLogPatch,
 } from "../../api/generated/workout-log/workout-log";
 import { WorkoutLogStatus } from "../../api/generated/quickfitApi.schemas";
-import { useToast } from "../../components/ui/Toast";
+import { useToast } from "../../components/ui/useToast";
 
 const WORKOUT_LOG_LIST_KEY = ["/api/workout-log"];
 

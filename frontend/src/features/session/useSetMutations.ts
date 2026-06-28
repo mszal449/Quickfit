@@ -11,7 +11,7 @@ import type {
   SetLogUpdate,
   WorkoutLogOut,
 } from "../../api/generated/quickfitApi.schemas";
-import { useToast } from "../../components/ui/Toast";
+import { useToast } from "../../components/ui/useToast";
 import { getErrorMessage } from "../../api/client";
 
 interface OptimisticCtx {
