@@ -201,6 +201,7 @@ export interface PlanOut {
   name: string;
   description: PlanOutDescription;
   visibility: PlanVisibility;
+  created_at: string;
 }
 
 export interface PlanSessionCreate {
