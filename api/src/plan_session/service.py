@@ -10,7 +10,7 @@ from models.plan import Plan
 from models.plan_session import PlanSession
 from models.plan_share import PlanShare, PlanShareStatus
 from plan.service import get_owned_plan, get_plan
-from plan_session.schema import PlanSessionCreate, PlanSessionOut
+from plan_session.schema import PlanSessionCreate, PlanSessionOut, PlanSessionUpdate
 
 LOG = get_logger()
 
@@ -37,6 +37,34 @@ async def create_plan_session(
     await db.flush()
     await db.refresh(session)
     LOG.info("plan_session_created", plan_session_id=str(session.id), plan_id=str(plan_id))
+    return PlanSessionOut.model_validate(session)
+
+
+async def update_plan_session(
+    db: AsyncSession,
+    plan_id: UUID,
+    plan_session_id: UUID,
+    user_id: UUID,
+    payload: PlanSessionUpdate,
+) -> PlanSessionOut:
+    await get_owned_plan(db, plan_id, user_id)
+    req = await db.execute(
+        select(PlanSession).where(PlanSession.id == plan_session_id, PlanSession.plan_id == plan_id)
+    )
+    session = req.scalar_one_or_none()
+    if session is None:
+        LOG.warning("plan_session_not_found", plan_session_id=str(plan_session_id))
+        raise NotFoundError("Plan session not found")
+
+    if payload.name is not None:
+        session.name = payload.name
+    if payload.prescription is not None:
+        await assert_exercises_exist(db, {e.exercise_id for e in payload.prescription.exercises})
+        session.prescription = payload.prescription.model_dump(mode="json")
+
+    await db.flush()
+    await db.refresh(session)
+    LOG.info("plan_session_updated", plan_session_id=str(plan_session_id), plan_id=str(plan_id))
     return PlanSessionOut.model_validate(session)
 
 

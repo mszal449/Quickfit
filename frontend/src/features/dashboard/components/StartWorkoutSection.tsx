@@ -8,23 +8,21 @@ interface StartWorkoutSectionProps {
   groups: PlanStartGroup[];
   onStart: (planId: string, sessionId: string) => void;
   heading?: string;
-  excludeSessionId?: string;
 }
 
 export function StartWorkoutSection({
   groups,
   onStart,
   heading = "Start a workout",
-  excludeSessionId,
 }: StartWorkoutSectionProps) {
   const [activePlanId, setActivePlanId] = useState(groups[0]?.plan_id ?? "");
   const active = groups.find((g) => g.plan_id === activePlanId) ?? groups[0];
 
   if (!active) return null;
 
-  const ordered = [...active.sessions]
-    .filter((s) => s.session_id !== excludeSessionId)
-    .sort((a, b) => Number(b.is_suggested) - Number(a.is_suggested));
+  const ordered = [...active.sessions].sort(
+    (a, b) => Number(b.is_suggested) - Number(a.is_suggested),
+  );
 
   if (ordered.length === 0) return null;
 

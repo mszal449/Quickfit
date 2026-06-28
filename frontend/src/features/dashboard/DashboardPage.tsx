@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDashboard, useHistory } from "../../mocks/hooks";
+import { useDashboard } from "../../mocks/hooks";
 import { Eyebrow } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
@@ -29,8 +29,10 @@ export function DashboardPage() {
   const { data: workout } = useGetWorkoutLogsGet({
     status: WorkoutLogStatus.in_progress,
   });
+  const { data: completed } = useGetWorkoutLogsGet({
+    status: WorkoutLogStatus.completed,
+  });
   const { namesById } = useExerciseNames();
-  const { data: history } = useHistory();
   const navigate = useNavigate();
   const { start } = useStartWorkout();
   const { finish, discard } = useWorkoutLogActions();
@@ -39,7 +41,7 @@ export function DashboardPage() {
   const activeLog = workout?.items[0] ?? null;
   const active = activeLog ? toActiveSession(activeLog, plans) : null;
 
-  const startGroups = buildStartOptions(plans, namesById, history);
+  const startGroups = buildStartOptions(plans, namesById, completed?.items ?? []);
   const suggested =
     startGroups[0]?.sessions.find((s) => s.is_suggested) ??
     startGroups[0]?.sessions[0] ??
@@ -100,7 +102,6 @@ export function DashboardPage() {
                 groups={startGroups}
                 onStart={startSession}
                 heading="Or start another"
-                excludeSessionId={suggested.session_id}
               />
             </>
           ) : (

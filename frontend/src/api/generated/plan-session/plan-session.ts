@@ -28,7 +28,8 @@ import type {
   HTTPValidationError,
   PagePlanSessionOut,
   PlanSessionCreate,
-  PlanSessionOut
+  PlanSessionOut,
+  PlanSessionUpdate
 } from '../quickfitApi.schemas';
 
 import { customFetch } from '../../client';
@@ -295,6 +296,71 @@ export function useGetSessionGet<TData = Awaited<ReturnType<typeof getSessionGet
 
 
 /**
+ * @summary Update Session
+ */
+export const updateSessionPatch = (
+    planId: string,
+    planSessionId: string,
+    planSessionUpdate: PlanSessionUpdate,
+ options?: SecondParameter<typeof customFetch>,) => {
+      
+      
+      return customFetch<PlanSessionOut>(
+      {url: `/api/plan/${planId}/session/${planSessionId}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: planSessionUpdate
+    },
+      options);
+    }
+  
+
+
+export const getUpdateSessionPatchMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSessionPatch>>, TError,{planId: string;planSessionId: string;data: PlanSessionUpdate}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateSessionPatch>>, TError,{planId: string;planSessionId: string;data: PlanSessionUpdate}, TContext> => {
+
+const mutationKey = ['updateSessionPatch'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateSessionPatch>>, {planId: string;planSessionId: string;data: PlanSessionUpdate}> = (props) => {
+          const {planId,planSessionId,data} = props ?? {};
+
+          return  updateSessionPatch(planId,planSessionId,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateSessionPatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateSessionPatch>>>
+    export type UpdateSessionPatchMutationBody = PlanSessionUpdate
+    export type UpdateSessionPatchMutationError = HTTPValidationError
+
+    /**
+ * @summary Update Session
+ */
+export const useUpdateSessionPatch = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSessionPatch>>, TError,{planId: string;planSessionId: string;data: PlanSessionUpdate}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateSessionPatch>>,
+        TError,
+        {planId: string;planSessionId: string;data: PlanSessionUpdate},
+        TContext
+      > => {
+
+      const mutationOptions = getUpdateSessionPatchMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Delete Session
  */
 export const deleteSessionDelete = (

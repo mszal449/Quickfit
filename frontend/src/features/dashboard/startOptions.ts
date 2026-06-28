@@ -1,4 +1,4 @@
-import type { WorkoutHistoryItem } from "../../mocks/types";
+import type { WorkoutLogOut } from "../../api/generated/quickfitApi.schemas";
 import type { PlanWithSessions } from "../plans/usePlansWithSessions";
 
 export interface SessionStartOption {
@@ -26,14 +26,10 @@ function estimateMinutes(setCount: number): number {
   return Math.round(setCount * 2.7) + 6;
 }
 
-function lastPerformed(
-  plan: PlanWithSessions,
-  sessionName: string,
-  history: WorkoutHistoryItem[],
-): string | null {
-  const matches = history
-    .filter((h) => h.plan_name === plan.name && h.session_name === sessionName)
-    .map((h) => h.performed_at)
+function lastPerformed(sessionId: string, completedLogs: WorkoutLogOut[]): string | null {
+  const matches = completedLogs
+    .filter((log) => log.plan_session_id === sessionId)
+    .map((log) => log.performed_at)
     .sort()
     .reverse();
   return matches[0] ?? null;
@@ -42,7 +38,7 @@ function lastPerformed(
 export function buildStartOptions(
   plans: PlanWithSessions[],
   namesById: Map<string, string>,
-  history: WorkoutHistoryItem[],
+  completedLogs: WorkoutLogOut[],
 ): PlanStartGroup[] {
   return plans.map((plan) => {
     const sessions: SessionStartOption[] = plan.sessions.map((session) => {
@@ -56,7 +52,7 @@ export function buildStartOptions(
         exercise_count: exercises.length,
         set_count: setCount,
         est_minutes: estimateMinutes(setCount),
-        last_performed_at: lastPerformed(plan, session.name, history),
+        last_performed_at: lastPerformed(session.id, completedLogs),
         exercise_preview: exercises
           .slice(0, 3)
           .map((e) => namesById.get(e.exercise_id) ?? "Exercise"),
@@ -68,15 +64,13 @@ export function buildStartOptions(
     const mostRecentIdx = sessions.reduce<{ idx: number; at: string } | null>(
       (acc, s, idx) => {
         if (!s.last_performed_at) return acc;
-        if (!acc || s.last_performed_at > acc.at)
-          return { idx, at: s.last_performed_at };
+        if (!acc || s.last_performed_at > acc.at) return { idx, at: s.last_performed_at };
         return acc;
       },
       null,
     );
 
-    const suggestedIdx =
-      mostRecentIdx != null ? (mostRecentIdx.idx + 1) % sessions.length : 0;
+    const suggestedIdx = mostRecentIdx != null ? (mostRecentIdx.idx + 1) % sessions.length : 0;
     if (sessions[suggestedIdx]) sessions[suggestedIdx].is_suggested = true;
 
     return {

@@ -27,6 +27,7 @@ import type {
 import type {
   ExerciseCreate,
   ExerciseOut,
+  ExerciseUpdate,
   HTTPValidationError,
   PageExerciseOut
 } from '../quickfitApi.schemas';
@@ -287,6 +288,70 @@ export function useGetExerciseGet<TData = Awaited<ReturnType<typeof getExerciseG
 
 
 /**
+ * @summary Update Exercise
+ */
+export const updateExercisePatch = (
+    exerciseId: string,
+    exerciseUpdate: ExerciseUpdate,
+ options?: SecondParameter<typeof customFetch>,) => {
+      
+      
+      return customFetch<ExerciseOut>(
+      {url: `/api/exercise/${exerciseId}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: exerciseUpdate
+    },
+      options);
+    }
+  
+
+
+export const getUpdateExercisePatchMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExercisePatch>>, TError,{exerciseId: string;data: ExerciseUpdate}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateExercisePatch>>, TError,{exerciseId: string;data: ExerciseUpdate}, TContext> => {
+
+const mutationKey = ['updateExercisePatch'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateExercisePatch>>, {exerciseId: string;data: ExerciseUpdate}> = (props) => {
+          const {exerciseId,data} = props ?? {};
+
+          return  updateExercisePatch(exerciseId,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateExercisePatchMutationResult = NonNullable<Awaited<ReturnType<typeof updateExercisePatch>>>
+    export type UpdateExercisePatchMutationBody = ExerciseUpdate
+    export type UpdateExercisePatchMutationError = HTTPValidationError
+
+    /**
+ * @summary Update Exercise
+ */
+export const useUpdateExercisePatch = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExercisePatch>>, TError,{exerciseId: string;data: ExerciseUpdate}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateExercisePatch>>,
+        TError,
+        {exerciseId: string;data: ExerciseUpdate},
+        TContext
+      > => {
+
+      const mutationOptions = getUpdateExercisePatchMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Delete Exercise
  */
 export const deleteExerciseDelete = (

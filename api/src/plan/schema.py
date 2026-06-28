@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -13,6 +14,7 @@ class PlanOut(BaseModel):
     name: str
     description: str | None
     visibility: PlanVisibility
+    created_at: datetime
 
 
 class PlanCreate(BaseModel):

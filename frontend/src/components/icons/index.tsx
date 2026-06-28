@@ -84,6 +84,12 @@ export const ChevronRightIcon = (p: IconProps) => (
   </Base>
 );
 
+export const ChevronDownIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="m6 9 6 6 6-6" />
+  </Base>
+);
+
 export const PlusIcon = (p: IconProps) => (
   <Base {...p}>
     <path d="M12 5v14M5 12h14" />

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "../../lib/cn";
 
 interface MenuItem {
@@ -23,6 +24,15 @@ interface MenuProps {
  * exposes role="menu"/"menuitem". Used for contextual actions like the
  * in-progress session's finish/discard overflow.
  */
+interface Coords {
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
+}
+
+const GAP = 4;
+
 export function Menu({
   trigger,
   items,
@@ -33,27 +43,60 @@ export function Menu({
   className,
 }: MenuProps) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState<Coords | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const reposition = () => {
+    const rect = wrapperRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setCoords({
+      ...(side === "top"
+        ? { bottom: window.innerHeight - rect.top + GAP }
+        : { top: rect.bottom + GAP }),
+      ...(align === "right"
+        ? { right: window.innerWidth - rect.right }
+        : { left: rect.left }),
+    });
+  };
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    reposition();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     const onClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
+      const target = e.target as Node;
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(target) &&
+        menuRef.current &&
+        !menuRef.current.contains(target)
+      ) {
         setOpen(false);
+      }
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
     document.addEventListener("mousedown", onClick);
     document.addEventListener("keydown", onKey);
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reposition);
     return () => {
       document.removeEventListener("mousedown", onClick);
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("resize", reposition);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   return (
-    <div ref={ref} className={cn("relative", className)}>
+    <div ref={wrapperRef} className={className}>
       <button
         type="button"
         aria-haspopup="menu"
@@ -68,36 +111,37 @@ export function Menu({
         {trigger}
       </button>
 
-      {open && (
-        <div
-          role="menu"
-          className={cn(
-            "border-border bg-surface-2 absolute z-50 min-w-44 overflow-hidden rounded-xl border p-1 shadow-xl shadow-black/40",
-            side === "top" ? "bottom-full mb-1" : "top-full mt-1",
-            align === "right" ? "right-0" : "left-0",
-          )}
-        >
-          {items.map((item) => (
-            <button
-              key={item.label}
-              role="menuitem"
-              onClick={() => {
-                setOpen(false);
-                item.onSelect();
-              }}
-              className={cn(
-                "flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors",
-                item.destructive
-                  ? "text-danger hover:bg-danger-soft"
-                  : "text-fg hover:bg-surface-3",
-              )}
-            >
-              {item.icon}
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
+      {open &&
+        coords &&
+        createPortal(
+          <div
+            ref={menuRef}
+            role="menu"
+            style={coords}
+            className="border-border bg-surface-2 fixed z-50 min-w-44 overflow-hidden rounded-xl border p-1 shadow-xl shadow-black/40"
+          >
+            {items.map((item) => (
+              <button
+                key={item.label}
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false);
+                  item.onSelect();
+                }}
+                className={cn(
+                  "flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors",
+                  item.destructive
+                    ? "text-danger hover:bg-danger-soft"
+                    : "text-fg hover:bg-surface-3",
+                )}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

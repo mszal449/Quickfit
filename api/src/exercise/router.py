@@ -7,7 +7,7 @@ from auth.dependencies import CurrentUserId
 from common.schema import Page
 from config.middleware import DbSession
 from exercise import service
-from exercise.schema import ExerciseCreate, ExerciseOut
+from exercise.schema import ExerciseCreate, ExerciseOut, ExerciseUpdate
 
 LOG = get_logger()
 router = APIRouter(prefix="/exercise", tags=["exercise"])
@@ -31,6 +31,13 @@ async def create_exercise(
     user_id: CurrentUserId, payload: ExerciseCreate, db: DbSession
 ) -> ExerciseOut:
     return await service.create_user_exercise(db, user_id, payload)
+
+
+@router.patch("/{exercise_id}", response_model=ExerciseOut)
+async def update_exercise(
+    user_id: CurrentUserId, exercise_id: uuid.UUID, payload: ExerciseUpdate, db: DbSession
+) -> ExerciseOut:
+    return await service.update_user_exercise(db, user_id, exercise_id, payload)
 
 
 @router.delete("/{exercise_id}", status_code=status.HTTP_204_NO_CONTENT)

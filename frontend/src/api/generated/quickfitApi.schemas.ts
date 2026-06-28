@@ -11,7 +11,7 @@
 export type AddSetRequestReps = number | null;
 
 /**
- * Weight used, in kg
+ * Weight used, in kg. Negative values represent assistance (e.g. a resistance band reducing effective bodyweight).
  */
 export type AddSetRequestWeight = number | null;
 
@@ -30,7 +30,7 @@ export type AddSetRequestNotes = string | null;
 export interface AddSetRequest {
   /** Repetitions performed */
   reps?: AddSetRequestReps;
-  /** Weight used, in kg */
+  /** Weight used, in kg. Negative values represent assistance (e.g. a resistance band reducing effective bodyweight). */
   weight?: AddSetRequestWeight;
   /** Duration, for cardio */
   duration_seconds?: AddSetRequestDurationSeconds;
@@ -43,7 +43,21 @@ export interface AddSetRequest {
   exercise_id: string;
 }
 
+export type ExerciseCategory = typeof ExerciseCategory[keyof typeof ExerciseCategory];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ExerciseCategory = {
+  strength: 'strength',
+  cardio: 'cardio',
+} as const;
+
 export type ExerciseCreateDescription = string | null;
+
+/**
+ * Required for strength exercises; ignored for cardio
+ */
+export type ExerciseCreateMuscleGroup = MuscleGroup | null;
 
 export interface ExerciseCreate {
   /**
@@ -52,6 +66,9 @@ export interface ExerciseCreate {
    */
   name: string;
   description?: ExerciseCreateDescription;
+  category?: ExerciseCategory;
+  /** Required for strength exercises; ignored for cardio */
+  muscle_group?: ExerciseCreateMuscleGroup;
 }
 
 export interface ExerciseLogEntry {
@@ -66,11 +83,15 @@ export interface ExerciseLogEntry {
 
 export type ExerciseOutDescription = string | null;
 
+export type ExerciseOutMuscleGroup = MuscleGroup | null;
+
 export interface ExerciseOut {
   id: string;
   owner_id: string;
   name: string;
   description: ExerciseOutDescription;
+  category: ExerciseCategory;
+  muscle_group: ExerciseOutMuscleGroup;
 }
 
 /**
@@ -90,6 +111,33 @@ export interface ExercisePrescription {
   description?: ExercisePrescriptionDescription;
 }
 
+export type ExerciseUpdateName = string | null;
+
+/**
+ * Omit to keep as-is; send null to clear
+ */
+export type ExerciseUpdateDescription = string | null;
+
+/**
+ * Leave unset to keep as-is
+ */
+export type ExerciseUpdateCategory = ExerciseCategory | null;
+
+/**
+ * Omit to keep as-is; send null to clear
+ */
+export type ExerciseUpdateMuscleGroup = MuscleGroup | null;
+
+export interface ExerciseUpdate {
+  name?: ExerciseUpdateName;
+  /** Omit to keep as-is; send null to clear */
+  description?: ExerciseUpdateDescription;
+  /** Leave unset to keep as-is */
+  category?: ExerciseUpdateCategory;
+  /** Omit to keep as-is; send null to clear */
+  muscle_group?: ExerciseUpdateMuscleGroup;
+}
+
 export interface HTTPValidationError {
   detail?: ValidationError[];
 }
@@ -97,6 +145,25 @@ export interface HTTPValidationError {
 export interface HealthResponse {
   status: string;
 }
+
+export type MuscleGroup = typeof MuscleGroup[keyof typeof MuscleGroup];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const MuscleGroup = {
+  chest: 'chest',
+  back: 'back',
+  shoulders: 'shoulders',
+  biceps: 'biceps',
+  triceps: 'triceps',
+  forearms: 'forearms',
+  core: 'core',
+  quads: 'quads',
+  hamstrings: 'hamstrings',
+  glutes: 'glutes',
+  calves: 'calves',
+  full_body: 'full_body',
+} as const;
 
 export interface PageExerciseOut {
   items: ExerciseOut[];
@@ -149,6 +216,23 @@ export interface PlanSessionOut {
   schema_version: number;
 }
 
+/**
+ * Leave unset to keep as-is
+ */
+export type PlanSessionUpdateName = string | null;
+
+/**
+ * If provided, replaces the session's prescription
+ */
+export type PlanSessionUpdatePrescription = SessionPrescription | null;
+
+export interface PlanSessionUpdate {
+  /** Leave unset to keep as-is */
+  name?: PlanSessionUpdateName;
+  /** If provided, replaces the session's prescription */
+  prescription?: PlanSessionUpdatePrescription;
+}
+
 export type PlanVisibility = typeof PlanVisibility[keyof typeof PlanVisibility];
 
 
@@ -172,7 +256,7 @@ export interface SessionPrescription {
 export type SetLogEntryReps = number | null;
 
 /**
- * Weight used, in kg
+ * Weight used, in kg. Negative values represent assistance (e.g. a resistance band reducing effective bodyweight).
  */
 export type SetLogEntryWeight = number | null;
 
@@ -191,7 +275,7 @@ export type SetLogEntryNotes = string | null;
 export interface SetLogEntry {
   /** Repetitions performed */
   reps?: SetLogEntryReps;
-  /** Weight used, in kg */
+  /** Weight used, in kg. Negative values represent assistance (e.g. a resistance band reducing effective bodyweight). */
   weight?: SetLogEntryWeight;
   /** Duration, for cardio */
   duration_seconds?: SetLogEntryDurationSeconds;
@@ -230,7 +314,7 @@ export interface SetLogOut {
 export type SetLogUpdateReps = number | null;
 
 /**
- * Omit to keep as-is; send null to clear
+ * Weight used, in kg (negative = assisted). Omit to keep as-is; send null to clear
  */
 export type SetLogUpdateWeight = number | null;
 
@@ -257,7 +341,7 @@ export type SetLogUpdateNotes = string | null;
 export interface SetLogUpdate {
   /** Omit to keep as-is; send null to clear */
   reps?: SetLogUpdateReps;
-  /** Omit to keep as-is; send null to clear */
+  /** Weight used, in kg (negative = assisted). Omit to keep as-is; send null to clear */
   weight?: SetLogUpdateWeight;
   /** Omit to keep as-is; send null to clear */
   duration_seconds?: SetLogUpdateDurationSeconds;

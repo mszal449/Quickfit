@@ -1,10 +1,32 @@
+import enum
 import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, Text, text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from models.model_base import BaseModel
+
+
+class ExerciseCategory(enum.StrEnum):
+    STRENGTH = "strength"
+    CARDIO = "cardio"
+
+
+class MuscleGroup(enum.StrEnum):
+    CHEST = "chest"
+    BACK = "back"
+    SHOULDERS = "shoulders"
+    BICEPS = "biceps"
+    TRICEPS = "triceps"
+    FOREARMS = "forearms"
+    CORE = "core"
+    QUADS = "quads"
+    HAMSTRINGS = "hamstrings"
+    GLUTES = "glutes"
+    CALVES = "calves"
+    FULL_BODY = "full_body"
 
 
 class Exercise(BaseModel):
@@ -26,6 +48,11 @@ class Exercise(BaseModel):
 
     name: Mapped[str] = mapped_column(String(255), index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    category: Mapped[ExerciseCategory] = mapped_column(
+        SAEnum(ExerciseCategory), default=ExerciseCategory.STRENGTH
+    )
+    # NULL for cardio exercises, which don't have a single primary muscle group.
+    muscle_group: Mapped[MuscleGroup | None] = mapped_column(SAEnum(MuscleGroup), nullable=True)
 
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 

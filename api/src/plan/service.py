@@ -1,7 +1,8 @@
 from uuid import UUID
 
-from sqlalchemy import delete, exists, or_, select
+from sqlalchemy import exists, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from structlog import get_logger
 
 from common.exceptions import NotFoundError
@@ -25,7 +26,7 @@ async def list_plans(db: AsyncSession, user_id: UUID, filters: PlanFilterParams)
     else:
         query = select(Plan).where(Plan.owner_id == user_id)
 
-    req = await db.execute(query)
+    req = await db.execute(query.order_by(Plan.created_at.desc()))
     return [PlanOut.model_validate(plan) for plan in req.scalars().all()]
 
 
@@ -69,8 +70,15 @@ async def create_plan(db: AsyncSession, user_id: UUID, plan: PlanCreate) -> Plan
 
 
 async def delete_plan(db: AsyncSession, user_id: UUID, plan_id: UUID) -> None:
-    result = await db.execute(delete(Plan).where(Plan.owner_id == user_id, Plan.id == plan_id))
-    if result.rowcount == 0:  # type: ignore[attr-defined]
+    req = await db.execute(
+        select(Plan)
+        .where(Plan.id == plan_id, Plan.owner_id == user_id)
+        .options(selectinload(Plan.sessions), selectinload(Plan.shares))
+    )
+    plan = req.scalar_one_or_none()
+    if plan is None:
         LOG.warning("plan_not_found", plan_id=str(plan_id), user_id=str(user_id))
         raise NotFoundError("Plan not found")
+    await db.delete(plan)
+    await db.flush()
     LOG.info("plan_deleted", plan_id=str(plan_id), user_id=str(user_id))
