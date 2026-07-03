@@ -15,6 +15,7 @@ import { useCurrentUser } from "../../auth/useCurrentUser";
 import {
   useCreatePlanPost,
   useDeletePlanDelete,
+  useUpdatePlanPatch,
   getGetPlansGetQueryKey,
 } from "../../api/generated/plan/plan";
 import {
@@ -41,6 +42,7 @@ export function PlansPage() {
   const [view, setView] = useState<View>("mine");
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<PlanWithSessions | null>(null);
+  const [leavingShareId, setLeavingShareId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   const navigate = useNavigate();
@@ -51,11 +53,16 @@ export function PlansPage() {
   const { data: plans, isLoading } = usePlansWithSessions();
   const sortedPlans = useMemo(() => {
     const sign = sortOrder === "newest" ? -1 : 1;
-    return [...plans].sort(
-      (a, b) =>
-        sign *
-        (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()),
-    );
+    const defaultPlan = plans.find((p) => p.is_default);
+    const rest = plans
+      .filter((p) => !p.is_default)
+      .sort(
+        (a, b) =>
+          sign *
+          (new Date(a.created_at).getTime() -
+            new Date(b.created_at).getTime()),
+      );
+    return defaultPlan ? [defaultPlan, ...rest] : rest;
   }, [plans, sortOrder]);
 
   const { data: sharedPlans, isLoading: sharedLoading } = usePlansWithSessions(
@@ -68,6 +75,15 @@ export function PlansPage() {
     (s) =>
       s.status === PlanShareStatus.pending && s.owner_id !== currentUser?.id,
   );
+  const acceptedShareIdByPlanId = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const s of allSharesPage?.items ?? []) {
+      if (s.status === PlanShareStatus.accepted && s.owner_id !== currentUser?.id) {
+        map.set(s.plan_id, s.id);
+      }
+    }
+    return map;
+  }, [allSharesPage, currentUser]);
 
   const invalidateShares = () =>
     queryClient.invalidateQueries({ queryKey: getGetPlanSharesGetQueryKey() });
@@ -83,11 +99,13 @@ export function PlansPage() {
     },
   });
 
-  const declineShare = useRemovePlanShareDelete({
+  const removeShare = useRemovePlanShareDelete({
     mutation: {
       onSuccess: () => {
-        toast.success("Invite declined");
+        toast.success("Removed");
         invalidateShares();
+        queryClient.invalidateQueries({ queryKey: getGetPlansGetQueryKey() });
+        setLeavingShareId(null);
       },
       onError: (e) => toast.error(getErrorMessage(e)),
     },
@@ -108,6 +126,18 @@ export function PlansPage() {
     mutation: {
       onSuccess: () => {
         toast.success("Plan deleted");
+        queryClient.invalidateQueries({ queryKey: getGetPlansGetQueryKey() });
+      },
+      onError: (e) => toast.error(getErrorMessage(e)),
+    },
+  });
+
+  const updatePlan = useUpdatePlanPatch({
+    mutation: {
+      onSuccess: (plan) => {
+        toast.success(
+          plan.is_default ? "Set as default plan" : "Removed as default plan",
+        );
         queryClient.invalidateQueries({ queryKey: getGetPlansGetQueryKey() });
       },
       onError: (e) => toast.error(getErrorMessage(e)),
@@ -191,6 +221,12 @@ export function PlansPage() {
                   key={plan.id}
                   plan={plan}
                   onDelete={() => setDeleting(plan)}
+                  onSetDefault={() =>
+                    updatePlan.mutate({
+                      planId: plan.id,
+                      data: { is_default: !plan.is_default },
+                    })
+                  }
                 />
               ))}
             </div>
@@ -234,7 +270,7 @@ export function PlansPage() {
                         className="flex-1 sm:flex-initial"
                         iconLeft={<CloseIcon size={15} />}
                         onClick={() =>
-                          declineShare.mutate({ planShareId: share.id })
+                          removeShare.mutate({ planShareId: share.id })
                         }
                       >
                         Decline
@@ -261,9 +297,18 @@ export function PlansPage() {
             )
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {sharedPlans.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
+              {sharedPlans.map((plan) => {
+                const shareId = acceptedShareIdByPlanId.get(plan.id);
+                return (
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    onLeave={
+                      shareId ? () => setLeavingShareId(shareId) : undefined
+                    }
+                  />
+                );
+              })}
             </div>
           )}
         </>
@@ -277,6 +322,18 @@ export function PlansPage() {
         destructive
         onConfirm={() => deleting && deletePlan.mutate({ planId: deleting.id })}
         onClose={() => setDeleting(null)}
+      />
+
+      <ConfirmDialog
+        open={leavingShareId !== null}
+        title="Remove this shared plan?"
+        description="You'll stop seeing it here. The owner can share it with you again later."
+        confirmLabel="Remove"
+        destructive
+        onConfirm={() =>
+          leavingShareId && removeShare.mutate({ planShareId: leavingShareId })
+        }
+        onClose={() => setLeavingShareId(null)}
       />
 
       <PlanFormModal

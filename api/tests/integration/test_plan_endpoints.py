@@ -190,6 +190,22 @@ async def test_delete_plan_not_owner_returns_not_found(
     assert still_there.status_code == 200
 
 
+async def test_set_default_plan_unsets_previous_default(
+    client: AsyncClient, db_session: AsyncSession, user: User
+):
+    first = Plan(owner_id=user.id, name="First", description=None, is_default=True)
+    second = Plan(owner_id=user.id, name="Second", description=None)
+    db_session.add_all([first, second])
+    await db_session.flush()
+
+    resp = await client.patch(f"/api/plan/{second.id}", json={"is_default": True})
+    assert resp.status_code == 200
+    assert resp.json()["is_default"] is True
+
+    await db_session.refresh(first)
+    assert first.is_default is False
+
+
 async def test_plan_endpoints_require_auth(app: FastAPI):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         resp = await ac.get("/api/plan")

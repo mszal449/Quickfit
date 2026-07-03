@@ -14,6 +14,7 @@ class PlanOut(BaseModel):
     name: str
     description: str | None
     visibility: PlanVisibility
+    is_default: bool
     created_at: datetime
 
 

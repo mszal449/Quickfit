@@ -24,6 +24,9 @@ class User(BaseModel):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), default=UserRole.USER)
     is_email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    default_plan_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("plans.id", ondelete="SET NULL"), index=True, nullable=True
+    )
 
     identities: Mapped[list["AuthIdentity"]] = relationship(back_populates="user")
 

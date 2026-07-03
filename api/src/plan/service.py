@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import exists, or_, select
+from sqlalchemy import exists, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from structlog import get_logger
@@ -84,6 +84,14 @@ async def update_plan(
         plan.description = payload.description
     if payload.visibility is not None:
         plan.visibility = payload.visibility
+    if payload.is_default is not None:
+        if payload.is_default:
+            await db.execute(
+                update(Plan).where(Plan.owner_id == user_id, Plan.id != plan_id).values(
+                    is_default=False
+                )
+            )
+        plan.is_default = payload.is_default
 
     await db.flush()
     await db.refresh(plan)

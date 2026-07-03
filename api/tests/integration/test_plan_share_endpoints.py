@@ -227,6 +227,23 @@ async def test_remove_accepted_plan_share_is_conflict(
     assert resp.status_code == 409
 
 
+async def test_recipient_can_leave_accepted_plan_share(
+    client: AsyncClient, db_session: AsyncSession, user: User, other_user: User
+):
+    plan = await _make_plan(db_session, other_user)
+    share = PlanShare(
+        plan_id=plan.id,
+        owner_id=other_user.id,
+        shared_with_user_id=user.id,
+        status=PlanShareStatus.ACCEPTED,
+    )
+    db_session.add(share)
+    await db_session.flush()
+
+    resp = await client.delete(f"/api/plan-share/{share.id}")
+    assert resp.status_code == 204
+
+
 async def test_remove_plan_share_unrelated_user_returns_not_found(
     client: AsyncClient, db_session: AsyncSession, other_user: User
 ):

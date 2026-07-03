@@ -240,6 +240,7 @@ export interface PlanOut {
   name: string;
   description: PlanOutDescription;
   visibility: PlanVisibility;
+  is_default: boolean;
   created_at: string;
 }
 
@@ -322,6 +323,11 @@ export type PlanUpdateDescription = string | null;
  */
 export type PlanUpdateVisibility = PlanVisibility | null;
 
+/**
+ * Set True to make this the Dashboard's default plan (unsets any other default plan you own). Leave unset to keep as-is.
+ */
+export type PlanUpdateIsDefault = boolean | null;
+
 export interface PlanUpdate {
   /** Leave unset to keep as-is */
   name?: PlanUpdateName;
@@ -329,6 +335,8 @@ export interface PlanUpdate {
   description?: PlanUpdateDescription;
   /** Leave unset to keep as-is */
   visibility?: PlanUpdateVisibility;
+  /** Set True to make this the Dashboard's default plan (unsets any other default plan you own). Leave unset to keep as-is. */
+  is_default?: PlanUpdateIsDefault;
 }
 
 export type PlanVisibility = typeof PlanVisibility[keyof typeof PlanVisibility];

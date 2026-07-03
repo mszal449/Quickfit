@@ -30,8 +30,6 @@ def upgrade() -> None:
     op.add_column(
         "workout_logs", sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True)
     )
-    # Backfill: pre-existing completed workouts have no recorded completion time,
-    # so approximate it with started_at rather than leaving historical rows null.
     op.execute("UPDATE workout_logs SET completed_at = started_at WHERE status = 'COMPLETED'")
 
 

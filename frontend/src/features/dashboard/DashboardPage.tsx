@@ -5,7 +5,7 @@ import { Button } from "../../components/ui/Button";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { PlusIcon } from "../../components/icons";
 import { formatDateLabel } from "../../lib/format";
-import { buildStartOptions } from "./startOptions";
+import { buildStartOptions, orderStartGroups } from "./startOptions";
 import {
   buildWeeklyVolume,
   computeStats,
@@ -31,6 +31,7 @@ import {
 export function DashboardPage() {
   const { data: user } = useCurrentUser();
   const { data: plans } = usePlansWithSessions();
+  const { data: sharedPlans } = usePlansWithSessions({ shared_with_me: true });
   const { data: workout } = useGetWorkoutLogsGet({
     status: WorkoutLogStatus.in_progress,
   });
@@ -52,10 +53,19 @@ export function DashboardPage() {
     () => completedPage?.items ?? [],
     [completedPage],
   );
+  const allPlans = useMemo(
+    () => [...plans, ...sharedPlans],
+    [plans, sharedPlans],
+  );
   const activeLog = workout?.items[0] ?? null;
-  const active = activeLog ? toActiveSession(activeLog, plans) : null;
+  const active = activeLog ? toActiveSession(activeLog, allPlans) : null;
 
-  const startGroups = buildStartOptions(plans, namesById, completedLogs);
+  const defaultPlanId = plans.find((p) => p.is_default)?.id ?? null;
+  const startGroups = orderStartGroups(
+    buildStartOptions(plans, namesById, completedLogs),
+    buildStartOptions(sharedPlans, namesById, completedLogs, true),
+    defaultPlanId,
+  );
   const suggested =
     startGroups[0]?.sessions.find((s) => s.is_suggested) ??
     startGroups[0]?.sessions[0] ??

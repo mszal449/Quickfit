@@ -95,7 +95,6 @@ export function HistoryPage() {
                   </div>
                 </div>
 
-                {/* metrics row */}
                 <div className="border-border flex shrink-0 gap-5 border-t pt-3 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5">
                   <Metric
                     value={

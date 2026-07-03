@@ -7,23 +7,62 @@ import {
   LinkIcon,
   MoreIcon,
   CloseIcon,
+  BoltIcon,
 } from "../../../components/icons";
 import { PlanVisibility } from "../../../api/generated/quickfitApi.schemas";
 import type { PlanWithSessions } from "../usePlansWithSessions";
 
 interface PlanCardProps {
-  plan: PlanWithSessions;
+  plan: PlanWithSessions & { is_default?: boolean };
+  /** Owner-only: delete the plan outright. */
   onDelete?: () => void;
+  /** Recipient-only: leave/stop following a plan shared with you. */
+  onLeave?: () => void;
+  /** Owner-only: toggle this plan as the one Dashboard defaults to. */
+  onSetDefault?: () => void;
 }
 
 const MAX_VISIBLE_SESSIONS = 3;
 
 /** Plan summary tile in the plans list; links to the builder. Every card has the
  * same height regardless of content — each region reserves fixed/min space. */
-export function PlanCard({ plan, onDelete }: PlanCardProps) {
+export function PlanCard({ plan, onDelete, onLeave, onSetDefault }: PlanCardProps) {
   const sessionCount = plan.sessions.length;
   const visibleSessions = plan.sessions.slice(0, MAX_VISIBLE_SESSIONS);
   const hiddenCount = sessionCount - visibleSessions.length;
+  const isOwned = !!onDelete;
+
+  const menuItems = [
+    ...(onSetDefault
+      ? [
+          {
+            label: plan.is_default ? "Remove as default" : "Set as default",
+            icon: <BoltIcon size={16} />,
+            onSelect: onSetDefault,
+          },
+        ]
+      : []),
+    ...(onDelete
+      ? [
+          {
+            label: "Delete plan",
+            icon: <CloseIcon size={16} />,
+            destructive: true,
+            onSelect: onDelete,
+          },
+        ]
+      : []),
+    ...(onLeave
+      ? [
+          {
+            label: "Remove from my plans",
+            icon: <CloseIcon size={16} />,
+            destructive: true,
+            onSelect: onLeave,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <div className="relative">
@@ -38,6 +77,11 @@ export function PlanCard({ plan, onDelete }: PlanCardProps) {
             <h2 className="font-display text-fg min-w-0 flex-1 truncate text-xl font-bold tracking-tight">
               {plan.name}
             </h2>
+            {plan.is_default && (
+              <Tag tone="primary">
+                <BoltIcon size={12} /> Default
+              </Tag>
+            )}
             {plan.visibility === PlanVisibility.shared && (
               <Tag tone="primary">
                 <LinkIcon size={12} /> Shared
@@ -63,7 +107,7 @@ export function PlanCard({ plan, onDelete }: PlanCardProps) {
               {sessionCount} session{sessionCount === 1 ? "" : "s"}
             </span>
             <span className="text-primary flex items-center gap-1 font-semibold">
-              Edit plan
+              {isOwned ? "Edit plan" : "View plan"}
               <ArrowRightIcon
                 size={16}
                 className="transition-transform group-hover:translate-x-0.5"
@@ -73,19 +117,12 @@ export function PlanCard({ plan, onDelete }: PlanCardProps) {
         </Card>
       </Link>
 
-      {onDelete && (
+      {menuItems.length > 0 && (
         <Menu
           className="absolute top-3 right-3"
           label={`Actions for ${plan.name}`}
           trigger={<MoreIcon size={18} />}
-          items={[
-            {
-              label: "Delete plan",
-              icon: <CloseIcon size={16} />,
-              destructive: true,
-              onSelect: onDelete,
-            },
-          ]}
+          items={menuItems}
         />
       )}
     </div>

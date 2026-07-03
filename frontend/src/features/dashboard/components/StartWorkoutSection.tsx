@@ -33,7 +33,10 @@ export function StartWorkoutSection({
       {groups.length > 1 && (
         <SegmentedTabs
           className="mb-3"
-          tabs={groups.map((g) => ({ id: g.plan_id, label: g.plan_name }))}
+          tabs={groups.map((g) => ({
+            id: g.plan_id,
+            label: g.is_shared ? `${g.plan_name} · Shared` : g.plan_name,
+          }))}
           active={active.plan_id}
           onChange={setActivePlanId}
         />

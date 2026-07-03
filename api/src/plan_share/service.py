@@ -188,7 +188,7 @@ async def revoke_plan_share(db: AsyncSession, user_id: UUID, plan_share_id: UUID
 
 async def remove_plan_share(db: AsyncSession, user_id: UUID, plan_share_id: UUID) -> None:
     share = await _get_related_plan_share(db, user_id, plan_share_id)
-    if share.status != PlanShareStatus.PENDING:
+    if share.owner_id == user_id and share.status != PlanShareStatus.PENDING:
         raise ConflictError("Use revoke to remove an accepted share")
 
     await db.delete(share)
