@@ -25,7 +25,7 @@ export function toActiveSession(
     workout_log_id: workout.id,
     plan_name: plan.name,
     session_name: session.name,
-    started_at: workout.performed_at,
+    started_at: workout.started_at,
     elapsed_seconds: 0,
     completed_sets: completedSets,
     total_sets: totalSets,

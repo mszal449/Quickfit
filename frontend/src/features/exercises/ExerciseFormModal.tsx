@@ -45,7 +45,8 @@ export function ExerciseFormModal({
   );
 
   const isStrength = category === ExerciseCategory.strength;
-  const canSubmit = name.trim().length > 0 && (!isStrength || muscleGroup !== null);
+  const canSubmit =
+    name.trim().length > 0 && (!isStrength || muscleGroup !== null);
 
   const handleSubmit = () => {
     if (!canSubmit) return;
@@ -121,7 +122,11 @@ export function ExerciseFormModal({
         <Button variant="ghost" onClick={onClose}>
           Cancel
         </Button>
-        <Button onClick={handleSubmit} disabled={!canSubmit} loading={isSubmitting}>
+        <Button
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          loading={isSubmitting}
+        >
           {isEdit ? "Save changes" : "Create exercise"}
         </Button>
       </div>

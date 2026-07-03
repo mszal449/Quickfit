@@ -4,40 +4,94 @@ import { useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "../../components/layout/PageHeader";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
+import { Tag } from "../../components/ui/Tag";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { SegmentedTabs } from "../../components/ui/SegmentedTabs";
-import { PlusIcon } from "../../components/icons";
+import { CheckIcon, CloseIcon, PlusIcon } from "../../components/icons";
 import { useToast } from "../../components/ui/useToast";
 import { getErrorMessage } from "../../api/client";
+import { useCurrentUser } from "../../auth/useCurrentUser";
 import {
   useCreatePlanPost,
   useDeletePlanDelete,
   getGetPlansGetQueryKey,
 } from "../../api/generated/plan/plan";
-import { PlanVisibility } from "../../api/generated/quickfitApi.schemas";
-import { usePlansWithSessions, type PlanWithSessions } from "./usePlansWithSessions";
+import {
+  useGetPlanSharesGet,
+  useAcceptPlanSharePost,
+  useRemovePlanShareDelete,
+  getGetPlanSharesGetQueryKey,
+} from "../../api/generated/plan-share/plan-share";
+import {
+  PlanShareStatus,
+  PlanVisibility,
+} from "../../api/generated/quickfitApi.schemas";
+import {
+  usePlansWithSessions,
+  type PlanWithSessions,
+} from "./usePlansWithSessions";
 import { PlanCard } from "./components/PlanCard";
 import { PlanFormModal, type PlanFormValues } from "./PlanFormModal";
 
 type SortOrder = "newest" | "oldest";
+type View = "mine" | "shared";
 
 export function PlansPage() {
-  const { data: plans, isLoading } = usePlansWithSessions();
+  const [view, setView] = useState<View>("mine");
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<PlanWithSessions | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
-  const sortedPlans = useMemo(() => {
-    const sign = sortOrder === "newest" ? -1 : 1;
-    return [...plans].sort(
-      (a, b) => sign * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()),
-    );
-  }, [plans, sortOrder]);
-
   const navigate = useNavigate();
   const toast = useToast();
   const queryClient = useQueryClient();
+  const { data: currentUser } = useCurrentUser();
+
+  const { data: plans, isLoading } = usePlansWithSessions();
+  const sortedPlans = useMemo(() => {
+    const sign = sortOrder === "newest" ? -1 : 1;
+    return [...plans].sort(
+      (a, b) =>
+        sign *
+        (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()),
+    );
+  }, [plans, sortOrder]);
+
+  const { data: sharedPlans, isLoading: sharedLoading } = usePlansWithSessions(
+    { shared_with_me: true },
+  );
+
+  const { data: allSharesPage, isLoading: sharesLoading } =
+    useGetPlanSharesGet(undefined, { query: { enabled: view === "shared" } });
+  const incomingInvites = (allSharesPage?.items ?? []).filter(
+    (s) =>
+      s.status === PlanShareStatus.pending && s.owner_id !== currentUser?.id,
+  );
+
+  const invalidateShares = () =>
+    queryClient.invalidateQueries({ queryKey: getGetPlanSharesGetQueryKey() });
+
+  const acceptShare = useAcceptPlanSharePost({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Plan added to your shared plans");
+        invalidateShares();
+        queryClient.invalidateQueries({ queryKey: getGetPlansGetQueryKey() });
+      },
+      onError: (e) => toast.error(getErrorMessage(e)),
+    },
+  });
+
+  const declineShare = useRemovePlanShareDelete({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Invite declined");
+        invalidateShares();
+      },
+      onError: (e) => toast.error(getErrorMessage(e)),
+    },
+  });
 
   const createPlan = useCreatePlanPost({
     mutation: {
@@ -75,44 +129,144 @@ export function PlansPage() {
       <PageHeader
         title="Plans"
         actions={
-          <Button iconLeft={<PlusIcon size={18} />} onClick={() => setCreating(true)}>
-            <span className="hidden sm:inline">New plan</span>
-            <span className="sm:hidden">New</span>
-          </Button>
+          view === "mine" && (
+            <Button
+              iconLeft={<PlusIcon size={18} />}
+              onClick={() => setCreating(true)}
+            >
+              <span className="hidden sm:inline">New plan</span>
+              <span className="sm:hidden">New</span>
+            </Button>
+          )
         }
       />
 
-      {!isLoading && plans.length > 0 && (
-        <SegmentedTabs
-          className="mb-5"
-          tabs={[
-            { id: "newest", label: "Newest first" },
-            { id: "oldest", label: "Oldest first" },
-          ]}
-          active={sortOrder}
-          onChange={(id) => setSortOrder(id as SortOrder)}
-        />
-      )}
+      <SegmentedTabs
+        className="mb-5"
+        tabs={[
+          { id: "mine", label: "My plans" },
+          {
+            id: "shared",
+            label: `Shared with me${incomingInvites.length ? ` (${incomingInvites.length})` : ""}`,
+          },
+        ]}
+        active={view}
+        onChange={(id) => setView(id as View)}
+      />
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-44 w-full rounded-2xl" />
-          ))}
-        </div>
-      ) : plans.length === 0 ? (
-        <Card className="flex flex-col items-center gap-3 p-10 text-center">
-          <p className="text-muted">You don't have any plans yet.</p>
-          <Button iconLeft={<PlusIcon size={18} />} onClick={() => setCreating(true)}>
-            Create your first plan
-          </Button>
-        </Card>
+      {view === "mine" ? (
+        <>
+          {!isLoading && plans.length > 0 && (
+            <SegmentedTabs
+              className="mb-5"
+              tabs={[
+                { id: "newest", label: "Newest first" },
+                { id: "oldest", label: "Oldest first" },
+              ]}
+              active={sortOrder}
+              onChange={(id) => setSortOrder(id as SortOrder)}
+            />
+          )}
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-44 w-full rounded-2xl" />
+              ))}
+            </div>
+          ) : plans.length === 0 ? (
+            <Card className="flex flex-col items-center gap-3 p-10 text-center">
+              <p className="text-muted">You don't have any plans yet.</p>
+              <Button
+                iconLeft={<PlusIcon size={18} />}
+                onClick={() => setCreating(true)}
+              >
+                Create your first plan
+              </Button>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {sortedPlans.map((plan) => (
+                <PlanCard
+                  key={plan.id}
+                  plan={plan}
+                  onDelete={() => setDeleting(plan)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {sortedPlans.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} onDelete={() => setDeleting(plan)} />
-          ))}
-        </div>
+        <>
+          {incomingInvites.length > 0 && (
+            <div className="mb-6">
+              <div className="text-faint mb-2 font-mono text-[11px] tracking-wide uppercase">
+                Invites
+              </div>
+              <Card className="divide-border divide-y overflow-hidden p-0">
+                {incomingInvites.map((share) => (
+                  <div
+                    key={share.id}
+                    className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center"
+                  >
+                    <div className="min-w-0 flex-1 truncate text-sm font-semibold">
+                      {share.user.email} shared a plan with you
+                    </div>
+                    <div className="flex gap-2 sm:shrink-0">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="flex-1 sm:flex-initial"
+                        iconLeft={<CheckIcon size={15} />}
+                        loading={
+                          acceptShare.isPending &&
+                          acceptShare.variables?.planShareId === share.id
+                        }
+                        onClick={() =>
+                          acceptShare.mutate({ planShareId: share.id })
+                        }
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex-1 sm:flex-initial"
+                        iconLeft={<CloseIcon size={15} />}
+                        onClick={() =>
+                          declineShare.mutate({ planShareId: share.id })
+                        }
+                      >
+                        Decline
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </Card>
+            </div>
+          )}
+
+          {sharedLoading || sharesLoading ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Skeleton key={i} className="h-44 w-full rounded-2xl" />
+              ))}
+            </div>
+          ) : sharedPlans.length === 0 ? (
+            incomingInvites.length === 0 && (
+              <Card className="text-muted flex flex-col items-center gap-2 p-10 text-center">
+                <Tag>No shared plans yet</Tag>
+                <p>Ask a friend to share one of their plans with you.</p>
+              </Card>
+            )
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {sharedPlans.map((plan) => (
+                <PlanCard key={plan.id} plan={plan} />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <ConfirmDialog

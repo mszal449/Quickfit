@@ -21,7 +21,11 @@ class PlanShareStatus(enum.StrEnum):
 
 class PlanShare(BaseModel):
     __tablename__ = "plan_shares"
-    __table_args__ = (UniqueConstraint("plan_id", "shared_with_user_id"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "plan_id", "shared_with_user_id", name="uq_plan_shares_plan_id_shared_with_user_id"
+        ),
+    )
 
     plan_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("plans.id"), index=True)
     owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)
@@ -32,6 +36,11 @@ class PlanShare(BaseModel):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     plan: Mapped["Plan"] = relationship(back_populates="shares")

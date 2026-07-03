@@ -31,9 +31,10 @@ class WorkoutLog(BaseModel):
     status: Mapped[WorkoutLogStatus] = mapped_column(
         SAEnum(WorkoutLogStatus), default=WorkoutLogStatus.IN_PROGRESS, index=True
     )
-    performed_at: Mapped[datetime] = mapped_column(
+    started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC), index=True
     )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     sets: Mapped[list["SetLog"]] = relationship(

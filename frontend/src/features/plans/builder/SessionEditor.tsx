@@ -11,6 +11,7 @@ interface SessionEditorProps {
   onChangeExercise: (exercise: DraftExercise) => void;
   onRemove: (uid: string) => void;
   onInsertAt: (index: number) => void;
+  readOnly?: boolean;
 }
 
 interface DragState {
@@ -34,6 +35,7 @@ export function SessionEditor({
   onChangeExercise,
   onRemove,
   onInsertAt,
+  readOnly = false,
 }: SessionEditorProps) {
   const cardEls = useRef(new Map<string, HTMLDivElement>());
   const rows = useRef<{ top: number; height: number }[]>([]);
@@ -55,9 +57,14 @@ export function SessionEditor({
     e.preventDefault();
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
 
-    const rects = exercises.map((ex) => cardEls.current.get(ex.uid)!.getBoundingClientRect());
+    const rects = exercises.map((ex) =>
+      cardEls.current.get(ex.uid)!.getBoundingClientRect(),
+    );
     const scrollY = window.scrollY;
-    rows.current = rects.map((r) => ({ top: r.top + scrollY, height: r.height }));
+    rows.current = rects.map((r) => ({
+      top: r.top + scrollY,
+      height: r.height,
+    }));
     const origin = rects[index];
 
     fromIndexRef.current = index;
@@ -76,7 +83,9 @@ export function SessionEditor({
 
     const onMove = (ev: globalThis.PointerEvent) => {
       pointerY.current = ev.clientY;
-      setDrag((prev) => (prev ? { ...prev, clientY: ev.clientY, dropSlot: computeSlot() } : prev));
+      setDrag((prev) =>
+        prev ? { ...prev, clientY: ev.clientY, dropSlot: computeSlot() } : prev,
+      );
     };
 
     const onUp = () => {
@@ -100,7 +109,8 @@ export function SessionEditor({
       const vh = window.innerHeight;
       let delta = 0;
       if (y < EDGE) delta = -MAX_SCROLL_SPEED * (1 - Math.max(0, y) / EDGE);
-      else if (y > vh - EDGE) delta = MAX_SCROLL_SPEED * (1 - Math.max(0, vh - y) / EDGE);
+      else if (y > vh - EDGE)
+        delta = MAX_SCROLL_SPEED * (1 - Math.max(0, vh - y) / EDGE);
       if (delta !== 0) {
         window.scrollBy(0, delta);
         setDrag((prev) => (prev ? { ...prev, dropSlot: computeSlot() } : prev));
@@ -115,7 +125,7 @@ export function SessionEditor({
 
   return (
     <div className="flex flex-col">
-      <Slot index={0} drag={drag} onInsert={onInsertAt} />
+      {!readOnly && <Slot index={0} drag={drag} onInsert={onInsertAt} />}
 
       {exercises.map((ex, i) => {
         const dragged = drag?.uid === ex.uid;
@@ -154,10 +164,13 @@ export function SessionEditor({
                 onRemove={() => onRemove(ex.uid)}
                 onHandlePointerDown={(e) => handlePointerDown(i, ex.uid, e)}
                 isDragging={dragged}
+                readOnly={readOnly}
               />
             </div>
 
-            <Slot key="slot" index={i + 1} drag={drag} onInsert={onInsertAt} />
+            {!readOnly && (
+              <Slot key="slot" index={i + 1} drag={drag} onInsert={onInsertAt} />
+            )}
           </div>
         );
       })}
@@ -175,7 +188,9 @@ function Slot({ index, drag, onInsert }: SlotProps) {
   if (drag) {
     return (
       <div className="flex h-8 items-center px-1">
-        {drag.dropSlot === index && <div className="bg-primary h-1 w-full rounded-full" />}
+        {drag.dropSlot === index && (
+          <div className="bg-primary h-1 w-full rounded-full" />
+        )}
       </div>
     );
   }

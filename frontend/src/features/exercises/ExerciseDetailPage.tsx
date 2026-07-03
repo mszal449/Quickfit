@@ -12,18 +12,30 @@ import { WorkoutLogStatus } from "../../api/generated/quickfitApi.schemas";
 import { exerciseHistory } from "../dashboard/aggregateStats";
 
 const MUSCLE_GROUP_LABELS: Record<string, string> = {
-  chest: "Chest", back: "Back", shoulders: "Shoulders", biceps: "Biceps",
-  triceps: "Triceps", forearms: "Forearms", core: "Core", quads: "Quads",
-  hamstrings: "Hamstrings", glutes: "Glutes", calves: "Calves", full_body: "Full body",
+  chest: "Chest",
+  back: "Back",
+  shoulders: "Shoulders",
+  biceps: "Biceps",
+  triceps: "Triceps",
+  forearms: "Forearms",
+  core: "Core",
+  quads: "Quads",
+  hamstrings: "Hamstrings",
+  glutes: "Glutes",
+  calves: "Calves",
+  full_body: "Full body",
 };
 
 export function ExerciseDetailPage() {
   const { exerciseId = "" } = useParams();
   const navigate = useNavigate();
 
-  const { data: exercise, isLoading: exLoading } = useGetExerciseGet(exerciseId, {
-    query: { enabled: !!exerciseId },
-  });
+  const { data: exercise, isLoading: exLoading } = useGetExerciseGet(
+    exerciseId,
+    {
+      query: { enabled: !!exerciseId },
+    },
+  );
   const { data: completedPage, isLoading: logsLoading } = useGetWorkoutLogsGet({
     status: WorkoutLogStatus.completed,
   });
@@ -39,7 +51,8 @@ export function ExerciseDetailPage() {
     for (const session of history) {
       for (const s of session.sets) {
         if (s.weight == null) continue;
-        if (!best || s.weight > best.weight) best = { weight: s.weight, reps: s.reps };
+        if (!best || s.weight > best.weight)
+          best = { weight: s.weight, reps: s.reps };
       }
     }
     return best;
@@ -61,7 +74,9 @@ export function ExerciseDetailPage() {
         <Card className="text-muted p-10 text-center">
           Exercise not found.
           <div className="mt-3">
-            <Button variant="secondary" onClick={() => navigate("/exercises")}>Back</Button>
+            <Button variant="secondary" onClick={() => navigate("/exercises")}>
+              Back
+            </Button>
           </div>
         </Card>
       </div>
@@ -78,13 +93,18 @@ export function ExerciseDetailPage() {
       </button>
 
       <div className="mb-5">
-        <h1 className="font-display text-fg text-3xl font-bold tracking-tight">{exercise.name}</h1>
+        <h1 className="font-display text-fg text-3xl font-bold tracking-tight">
+          {exercise.name}
+        </h1>
         <div className="mt-2 flex flex-wrap gap-2">
           <Tag tone={exercise.category === "cardio" ? "primary" : "muted"}>
             {exercise.category}
           </Tag>
           {exercise.muscle_group && (
-            <Tag tone="muted">{MUSCLE_GROUP_LABELS[exercise.muscle_group] ?? exercise.muscle_group}</Tag>
+            <Tag tone="muted">
+              {MUSCLE_GROUP_LABELS[exercise.muscle_group] ??
+                exercise.muscle_group}
+            </Tag>
           )}
         </div>
         {exercise.description && (
@@ -96,11 +116,15 @@ export function ExerciseDetailPage() {
         <Card className="mb-4 flex items-center gap-3 px-5 py-4">
           <TrophyIcon size={20} className="text-primary shrink-0" />
           <div>
-            <div className="text-faint font-mono text-[11px] tracking-wide uppercase">Best set</div>
+            <div className="text-faint font-mono text-[11px] tracking-wide uppercase">
+              Best set
+            </div>
             <div className="text-fg font-mono text-xl font-bold">
               {formatWeight(bestSet.weight)} kg
               {bestSet.reps != null && (
-                <span className="text-muted ml-2 text-sm font-normal">× {bestSet.reps} reps</span>
+                <span className="text-muted ml-2 text-sm font-normal">
+                  × {bestSet.reps} reps
+                </span>
               )}
             </div>
           </div>
@@ -109,7 +133,8 @@ export function ExerciseDetailPage() {
 
       {history.length === 0 ? (
         <Card className="text-muted p-10 text-center text-sm">
-          No logged sessions yet. Start a workout that includes this exercise to see your history.
+          No logged sessions yet. Start a workout that includes this exercise to
+          see your history.
         </Card>
       ) : (
         <div className="flex flex-col gap-2">
@@ -117,10 +142,11 @@ export function ExerciseDetailPage() {
             <Card key={i} className="px-4 py-3">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-faint font-mono text-[11px] tracking-wide uppercase">
-                  {relativeTime(session.performed_at)}
+                  {relativeTime(session.started_at)}
                 </span>
                 <span className="text-faint font-mono text-[11px]">
-                  {session.sets.length} set{session.sets.length === 1 ? "" : "s"}
+                  {session.sets.length} set
+                  {session.sets.length === 1 ? "" : "s"}
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">

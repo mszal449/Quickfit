@@ -39,7 +39,10 @@ export function PlanFormModal({
 
   return (
     <Modal open={open} onClose={onClose} labelledBy="plan-form-title">
-      <h2 id="plan-form-title" className="font-display text-fg text-2xl font-bold tracking-tight">
+      <h2
+        id="plan-form-title"
+        className="font-display text-fg text-2xl font-bold tracking-tight"
+      >
         {isEdit ? "Edit plan" : "New plan"}
       </h2>
 
@@ -75,7 +78,11 @@ export function PlanFormModal({
         <Button variant="ghost" onClick={onClose}>
           Cancel
         </Button>
-        <Button onClick={handleSubmit} disabled={!canSubmit} loading={isSubmitting}>
+        <Button
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          loading={isSubmitting}
+        >
           {isEdit ? "Save changes" : "Create plan"}
         </Button>
       </div>

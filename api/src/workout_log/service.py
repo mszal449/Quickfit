@@ -72,7 +72,7 @@ async def list_user_workout_logs(
     if filters.plan_id is not None:
         query = query.where(WorkoutLog.plan_id == filters.plan_id)
     req = await db.execute(
-        query.options(selectinload(WorkoutLog.sets)).order_by(WorkoutLog.performed_at.desc())
+        query.options(selectinload(WorkoutLog.sets)).order_by(WorkoutLog.started_at.desc())
     )
     return [WorkoutLogOut.model_validate(w) for w in req.scalars().all()]
 
@@ -91,9 +91,7 @@ async def get_last_completed_workout_log(
     if plan_id is not None:
         query = query.where(WorkoutLog.plan_id == plan_id)
     req = await db.execute(
-        query.options(selectinload(WorkoutLog.sets))
-        .order_by(WorkoutLog.performed_at.desc())
-        .limit(1)
+        query.options(selectinload(WorkoutLog.sets)).order_by(WorkoutLog.started_at.desc()).limit(1)
     )
     log = req.scalar_one_or_none()
     if log is None:
@@ -125,7 +123,8 @@ async def create_workout_log(
         user_id=user_id,
         plan_id=plan_id,
         plan_session_id=payload.plan_session_id,
-        performed_at=payload.performed_at or datetime.now(UTC),
+        started_at=payload.started_at or datetime.now(UTC),
+        completed_at=payload.completed_at,
         notes=payload.notes,
     )
     log.sets = _build_sets(payload.exercises)
@@ -148,12 +147,16 @@ async def update_workout_log(
 ) -> WorkoutLogOut:
     log = await _get_owned_workout_log(db, user_id, workout_log_id)
 
-    if payload.performed_at is not None:
-        log.performed_at = payload.performed_at
+    if payload.started_at is not None:
+        log.started_at = payload.started_at
+    if payload.completed_at is not None:
+        log.completed_at = payload.completed_at
     if "notes" in payload.model_fields_set:
         log.notes = payload.notes
     if payload.status is not None:
         log.status = payload.status
+        if payload.status == WorkoutLogStatus.COMPLETED and log.completed_at is None:
+            log.completed_at = datetime.now(UTC)
     if payload.exercises is not None:
         await assert_exercises_exist(db, {e.exercise_id for e in payload.exercises})
         log.sets = []

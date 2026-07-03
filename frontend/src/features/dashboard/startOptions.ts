@@ -9,7 +9,7 @@ export interface SessionStartOption {
   exercise_count: number;
   set_count: number;
   est_minutes: number;
-  last_performed_at: string | null;
+  last_started_at: string | null;
   exercise_preview: string[];
   /** Next session in the plan's rotation after the most recently performed one. */
   is_suggested: boolean;
@@ -26,10 +26,13 @@ function estimateMinutes(setCount: number): number {
   return Math.round(setCount * 2.7) + 6;
 }
 
-function lastPerformed(sessionId: string, completedLogs: WorkoutLogOut[]): string | null {
+function lastPerformed(
+  sessionId: string,
+  completedLogs: WorkoutLogOut[],
+): string | null {
   const matches = completedLogs
     .filter((log) => log.plan_session_id === sessionId)
-    .map((log) => log.performed_at)
+    .map((log) => log.started_at)
     .sort()
     .reverse();
   return matches[0] ?? null;
@@ -52,7 +55,7 @@ export function buildStartOptions(
         exercise_count: exercises.length,
         set_count: setCount,
         est_minutes: estimateMinutes(setCount),
-        last_performed_at: lastPerformed(session.id, completedLogs),
+        last_started_at: lastPerformed(session.id, completedLogs),
         exercise_preview: exercises
           .slice(0, 3)
           .map((e) => namesById.get(e.exercise_id) ?? "Exercise"),
@@ -63,14 +66,16 @@ export function buildStartOptions(
     // Suggested = the session after the most recently performed one (rotation).
     const mostRecentIdx = sessions.reduce<{ idx: number; at: string } | null>(
       (acc, s, idx) => {
-        if (!s.last_performed_at) return acc;
-        if (!acc || s.last_performed_at > acc.at) return { idx, at: s.last_performed_at };
+        if (!s.last_started_at) return acc;
+        if (!acc || s.last_started_at > acc.at)
+          return { idx, at: s.last_started_at };
         return acc;
       },
       null,
     );
 
-    const suggestedIdx = mostRecentIdx != null ? (mostRecentIdx.idx + 1) % sessions.length : 0;
+    const suggestedIdx =
+      mostRecentIdx != null ? (mostRecentIdx.idx + 1) % sessions.length : 0;
     if (sessions[suggestedIdx]) sessions[suggestedIdx].is_suggested = true;
 
     return {

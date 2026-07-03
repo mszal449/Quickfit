@@ -32,6 +32,6 @@ export interface LiveSessionModel {
   status: WorkoutLogStatus;
   plan_name: string;
   session_name: string;
-  performed_at: string;
+  started_at: string;
   exercises: LiveExercise[];
 }

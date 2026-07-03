@@ -49,15 +49,15 @@ export function NextWorkoutCard({ option, onStart }: NextWorkoutCardProps) {
           <span className="text-border-strong">/</span>
           <span className="text-muted">{option.set_count}</span> sets
           <span className="text-border-strong">/</span>
-          {option.last_performed_at
-            ? `last ${relativeTime(option.last_performed_at)}`
+          {option.last_started_at
+            ? `last ${relativeTime(option.last_started_at)}`
             : "new"}
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          {option.exercise_preview.map((name) => (
+          {option.exercise_preview.map((name, i) => (
             <span
-              key={name}
+              key={i}
               className="bg-surface-2 text-muted rounded-md px-2 py-0.5 font-mono text-[10px]"
             >
               {name}

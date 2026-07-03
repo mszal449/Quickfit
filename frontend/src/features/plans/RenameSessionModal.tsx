@@ -51,7 +51,11 @@ export function RenameSessionModal({
         <Button variant="ghost" onClick={onClose}>
           Cancel
         </Button>
-        <Button onClick={handleSubmit} disabled={!canSubmit} loading={isSubmitting}>
+        <Button
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          loading={isSubmitting}
+        >
           Save
         </Button>
       </div>

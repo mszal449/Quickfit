@@ -48,27 +48,30 @@ export function buildWeeklyVolume(
   const now = new Date();
   const currentWeekStart = startOfWeek(now);
 
-  const points: WeeklyVolumePoint[] = Array.from({ length: weeksCount }, (_, i) => {
-    const weekStart = new Date(currentWeekStart);
-    weekStart.setDate(weekStart.getDate() - (weeksCount - 1 - i) * 7);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-    const isCurrent = weekStart.getTime() === currentWeekStart.getTime();
-    const weekNum = weeksCount - i;
-    return {
-      week_label: isCurrent ? "now" : `W${weekNum}`,
-      volume_kg: 0,
-      is_current: isCurrent,
-      _start: weekStart.getTime(),
-      _end: weekEnd.getTime(),
-    } as WeeklyVolumePoint & { _start: number; _end: number };
-  });
+  const points: WeeklyVolumePoint[] = Array.from(
+    { length: weeksCount },
+    (_, i) => {
+      const weekStart = new Date(currentWeekStart);
+      weekStart.setDate(weekStart.getDate() - (weeksCount - 1 - i) * 7);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+      const isCurrent = weekStart.getTime() === currentWeekStart.getTime();
+      const weekNum = weeksCount - i;
+      return {
+        week_label: isCurrent ? "now" : `W${weekNum}`,
+        volume_kg: 0,
+        is_current: isCurrent,
+        _start: weekStart.getTime(),
+        _end: weekEnd.getTime(),
+      } as WeeklyVolumePoint & { _start: number; _end: number };
+    },
+  );
 
   for (const log of logs) {
-    const t = new Date(log.performed_at).getTime();
-    const point = (points as Array<WeeklyVolumePoint & { _start: number; _end: number }>).find(
-      (p) => t >= p._start && t < p._end,
-    );
+    const t = new Date(log.started_at).getTime();
+    const point = (
+      points as Array<WeeklyVolumePoint & { _start: number; _end: number }>
+    ).find((p) => t >= p._start && t < p._end);
     if (point) point.volume_kg += logVolume(log);
   }
 
@@ -86,12 +89,16 @@ export function computeStats(logs: WorkoutLogOut[]): DashboardStats {
   monthAgo.setDate(monthAgo.getDate() - 30);
 
   const logsThisWeek = logs.filter(
-    (l) => new Date(l.performed_at).getTime() >= currentWeekStart,
+    (l) => new Date(l.started_at).getTime() >= currentWeekStart,
   );
   const volume_week_kg = logsThisWeek.reduce((s, l) => s + logVolume(l), 0);
   const sessions_week = logsThisWeek.length;
 
-  const weekKeys = [...new Set(logs.map((l) => weekKey(new Date(l.performed_at))))].sort().reverse();
+  const weekKeys = [
+    ...new Set(logs.map((l) => weekKey(new Date(l.started_at)))),
+  ]
+    .sort()
+    .reverse();
   let streak_weeks = 0;
   const expectedWeekStart = new Date(currentWeekStart);
   for (const key of weekKeys) {
@@ -115,7 +122,8 @@ export function computeAllPRs(
   namesById: Map<string, string>,
 ): PersonalRecord[] {
   const sorted = [...logs].sort(
-    (a, b) => new Date(a.performed_at).getTime() - new Date(b.performed_at).getTime(),
+    (a, b) =>
+      new Date(a.started_at).getTime() - new Date(b.started_at).getTime(),
   );
 
   const bestByExercise = new Map<string, number>();
@@ -142,7 +150,7 @@ export function computeAllPRs(
           exercise_name: namesById.get(exId) ?? "Exercise",
           rep_label: topSet.reps != null ? `${topSet.reps} reps` : "set",
           weight: topSet.weight,
-          achieved_at: log.performed_at,
+          achieved_at: log.started_at,
         });
       }
     }
@@ -154,12 +162,18 @@ export function computeAllPRs(
 export function exerciseHistory(
   logs: WorkoutLogOut[],
   exerciseId: string,
-): Array<{ performed_at: string; sets: Array<{ weight: number | null; reps: number | null }> }> {
+): Array<{
+  started_at: string;
+  sets: Array<{ weight: number | null; reps: number | null }>;
+}> {
   return logs
     .filter((l) => l.sets.some((s) => s.exercise_id === exerciseId))
-    .sort((a, b) => new Date(b.performed_at).getTime() - new Date(a.performed_at).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.started_at).getTime() - new Date(a.started_at).getTime(),
+    )
     .map((l) => ({
-      performed_at: l.performed_at,
+      started_at: l.started_at,
       sets: l.sets
         .filter((s) => s.exercise_id === exerciseId)
         .sort((a, b) => a.set_index - b.set_index)

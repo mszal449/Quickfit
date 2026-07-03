@@ -13,6 +13,7 @@ interface ExerciseCardEditorProps {
   onRemove: () => void;
   onHandlePointerDown: (e: PointerEvent) => void;
   isDragging: boolean;
+  readOnly?: boolean;
 }
 
 export function ExerciseCardEditor({
@@ -23,6 +24,7 @@ export function ExerciseCardEditor({
   onRemove,
   onHandlePointerDown,
   isDragging,
+  readOnly = false,
 }: ExerciseCardEditorProps) {
   const setSets = (sets: DraftSet[]) => onChange({ ...exercise, sets });
 
@@ -34,32 +36,38 @@ export function ExerciseCardEditor({
       )}
     >
       <div className="mb-3 flex items-center gap-2">
-        <button
-          type="button"
-          aria-label={`Reorder ${name}`}
-          onPointerDown={onHandlePointerDown}
-          className="text-faint hover:text-fg -ml-1 flex h-8 w-7 shrink-0 cursor-grab touch-none items-center justify-center active:cursor-grabbing"
-        >
-          <GripIcon size={18} />
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            aria-label={`Reorder ${name}`}
+            onPointerDown={onHandlePointerDown}
+            className="text-faint hover:text-fg -ml-1 flex h-8 w-7 shrink-0 cursor-grab touch-none items-center justify-center active:cursor-grabbing"
+          >
+            <GripIcon size={18} />
+          </button>
+        )}
 
         <span className="bg-surface-3 text-muted flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-mono text-xs font-semibold">
           {index + 1}
         </span>
 
-        <h3 className="text-fg min-w-0 flex-1 truncate font-semibold">{name}</h3>
+        <h3 className="text-fg min-w-0 flex-1 truncate font-semibold">
+          {name}
+        </h3>
 
-        <button
-          type="button"
-          aria-label={`Remove ${name}`}
-          onClick={onRemove}
-          className="text-faint hover:text-danger flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-        >
-          <CloseIcon size={18} />
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            aria-label={`Remove ${name}`}
+            onClick={onRemove}
+            className="text-faint hover:text-danger flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+          >
+            <CloseIcon size={18} />
+          </button>
+        )}
       </div>
 
-      <SetsEditor sets={exercise.sets} onChange={setSets} />
+      <SetsEditor sets={exercise.sets} onChange={setSets} readOnly={readOnly} />
     </Card>
   );
 }

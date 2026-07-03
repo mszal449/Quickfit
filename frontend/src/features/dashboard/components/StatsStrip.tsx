@@ -4,9 +4,18 @@ import { formatTonnes } from "../../../lib/format";
 
 export function StatsStrip({ stats }: { stats: DashboardStats }) {
   const items = [
-    { value: formatTonnes(stats.volume_week_kg), unit: "t", label: "Volume / wk" },
+    {
+      value: formatTonnes(stats.volume_week_kg),
+      unit: "t",
+      label: "Volume / wk",
+    },
     { value: String(stats.sessions_week), unit: "", label: "Sessions / wk" },
-    { value: String(stats.streak_weeks), unit: "wk", label: "Streak", accent: true },
+    {
+      value: String(stats.streak_weeks),
+      unit: "wk",
+      label: "Streak",
+      accent: true,
+    },
     { value: String(stats.prs_this_month), unit: "", label: "PRs / 30d" },
   ];
 
@@ -22,7 +31,9 @@ export function StatsStrip({ stats }: { stats: DashboardStats }) {
                 {it.value}
               </span>
               {it.unit && (
-                <span className="text-faint text-xs font-medium">{it.unit}</span>
+                <span className="text-faint text-xs font-medium">
+                  {it.unit}
+                </span>
               )}
             </div>
             <div className="text-muted mt-0.5 text-xs">{it.label}</div>

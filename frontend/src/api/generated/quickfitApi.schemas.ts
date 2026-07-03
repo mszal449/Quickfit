@@ -209,6 +209,11 @@ export interface PagePlanOut {
   total: number;
 }
 
+export interface PagePlanShareOut {
+  items: PlanShareOut[];
+  total: number;
+}
+
 export interface PagePlanSessionOut {
   items: PlanSessionOut[];
   total: number;
@@ -267,6 +272,40 @@ export interface PlanSessionUpdate {
   /** If provided, replaces the session's prescription */
   prescription?: PlanSessionUpdatePrescription;
 }
+
+export interface PlanShareCreate {
+  /** Plan to share */
+  plan_id: string;
+  /** Friend to share the plan with */
+  shared_with_user_id: string;
+}
+
+export interface PlanShareUserOut {
+  id: string;
+  email: string;
+}
+
+export interface PlanShareOut {
+  id: string;
+  plan_id: string;
+  owner_id: string;
+  shared_with_user_id: string;
+  status: PlanShareStatus;
+  created_at: string;
+  updated_at: string;
+  /** The other party in this share */
+  user: PlanShareUserOut;
+}
+
+export type PlanShareStatus = typeof PlanShareStatus[keyof typeof PlanShareStatus];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PlanShareStatus = {
+  pending: 'pending',
+  accepted: 'accepted',
+  revoked: 'revoked',
+} as const;
 
 /**
  * Leave unset to keep as-is
@@ -465,17 +504,24 @@ export interface ValidationError {
 export type WorkoutLogCreatePlanSessionId = string | null;
 
 /**
- * When the workout happened; defaults to now
+ * When the workout started; defaults to now
  */
-export type WorkoutLogCreatePerformedAt = string | null;
+export type WorkoutLogCreateStartedAt = string | null;
+
+/**
+ * When the workout finished, if already completed
+ */
+export type WorkoutLogCreateCompletedAt = string | null;
 
 export type WorkoutLogCreateNotes = string | null;
 
 export interface WorkoutLogCreate {
   /** Plan session this workout was performed against, if any */
   plan_session_id?: WorkoutLogCreatePlanSessionId;
-  /** When the workout happened; defaults to now */
-  performed_at?: WorkoutLogCreatePerformedAt;
+  /** When the workout started; defaults to now */
+  started_at?: WorkoutLogCreateStartedAt;
+  /** When the workout finished, if already completed */
+  completed_at?: WorkoutLogCreateCompletedAt;
   notes?: WorkoutLogCreateNotes;
   /** Sets logged so far. Can be empty — clients may start an in-progress workout and append sets incrementally via POST .../set. */
   exercises?: ExerciseLogEntry[];
@@ -485,6 +531,8 @@ export type WorkoutLogOutPlanId = string | null;
 
 export type WorkoutLogOutPlanSessionId = string | null;
 
+export type WorkoutLogOutCompletedAt = string | null;
+
 export type WorkoutLogOutNotes = string | null;
 
 export interface WorkoutLogOut {
@@ -493,7 +541,8 @@ export interface WorkoutLogOut {
   plan_id: WorkoutLogOutPlanId;
   plan_session_id: WorkoutLogOutPlanSessionId;
   status: WorkoutLogStatus;
-  performed_at: string;
+  started_at: string;
+  completed_at: WorkoutLogOutCompletedAt;
   notes: WorkoutLogOutNotes;
   sets: SetLogOut[];
 }
@@ -510,7 +559,12 @@ export const WorkoutLogStatus = {
 /**
  * Leave unset to keep as-is
  */
-export type WorkoutLogUpdatePerformedAt = string | null;
+export type WorkoutLogUpdateStartedAt = string | null;
+
+/**
+ * Leave unset to keep as-is
+ */
+export type WorkoutLogUpdateCompletedAt = string | null;
 
 /**
  * Omit to keep as-is; send null to clear
@@ -529,7 +583,9 @@ export type WorkoutLogUpdateExercises = ExerciseLogEntry[] | null;
 
 export interface WorkoutLogUpdate {
   /** Leave unset to keep as-is */
-  performed_at?: WorkoutLogUpdatePerformedAt;
+  started_at?: WorkoutLogUpdateStartedAt;
+  /** Leave unset to keep as-is */
+  completed_at?: WorkoutLogUpdateCompletedAt;
   /** Omit to keep as-is; send null to clear */
   notes?: WorkoutLogUpdateNotes;
   /** Leave unset to keep as-is */
@@ -575,5 +631,16 @@ export type GetFriendshipsGetParams = {
  * Filter by status
  */
 status?: FriendshipStatus | null;
+};
+
+export type GetPlanSharesGetParams = {
+/**
+ * Filter by plan
+ */
+plan_id?: string | null;
+/**
+ * Filter by status
+ */
+status?: PlanShareStatus | null;
 };
 

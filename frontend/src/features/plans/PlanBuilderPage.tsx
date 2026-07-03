@@ -7,10 +7,22 @@ import { SegmentedTabs } from "../../components/ui/SegmentedTabs";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Menu } from "../../components/ui/Menu";
-import { ChevronLeftIcon, PlusIcon, PencilIcon, MoreIcon, CloseIcon } from "../../components/icons";
+import {
+  ChevronLeftIcon,
+  PlusIcon,
+  PencilIcon,
+  MoreIcon,
+  CloseIcon,
+  ShareIcon,
+} from "../../components/icons";
 import { useToast } from "../../components/ui/useToast";
 import { getErrorMessage } from "../../api/client";
-import { useGetPlanGet, useUpdatePlanPatch, getGetPlanGetQueryKey } from "../../api/generated/plan/plan";
+import { useCurrentUser } from "../../auth/useCurrentUser";
+import {
+  useGetPlanGet,
+  useUpdatePlanPatch,
+  getGetPlanGetQueryKey,
+} from "../../api/generated/plan/plan";
 import {
   useGetSessionsGet,
   useCreateSessionPost,
@@ -18,11 +30,13 @@ import {
   useDeleteSessionDelete,
   getGetSessionsGetQueryKey,
 } from "../../api/generated/plan-session/plan-session";
+import { useGetPlanSharesGet } from "../../api/generated/plan-share/plan-share";
 import { SessionDraftEditor } from "./builder/SessionDraftEditor";
 import { CreateSessionModal } from "./CreateSessionModal";
 import { RenameSessionModal } from "./RenameSessionModal";
 import { PlanFormModal, type PlanFormValues } from "./PlanFormModal";
 import { ExercisePickerModal } from "./builder/ExercisePickerModal";
+import { ShareModal } from "./ShareModal";
 import { newDraftExercise, toPrescription } from "./builder/prescriptionDraft";
 
 export function PlanBuilderPage() {
@@ -31,9 +45,18 @@ export function PlanBuilderPage() {
   const toast = useToast();
   const queryClient = useQueryClient();
 
+  const { data: currentUser } = useCurrentUser();
   const { data: plan, isLoading: planLoading } = useGetPlanGet(planId);
-  const { data: sessionsPage, isLoading: sessionsLoading } = useGetSessionsGet(planId);
+  const { data: sessionsPage, isLoading: sessionsLoading } =
+    useGetSessionsGet(planId);
   const sessions = sessionsPage?.items ?? [];
+  const isOwner = !!currentUser && plan?.owner_id === currentUser.id;
+
+  const { data: sharesPage } = useGetPlanSharesGet(
+    { plan_id: planId },
+    { query: { enabled: isOwner } },
+  );
+  const shares = sharesPage?.items ?? [];
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
@@ -43,8 +66,10 @@ export function PlanBuilderPage() {
   const [editingPlan, setEditingPlan] = useState(false);
   const [renamingSession, setRenamingSession] = useState(false);
   const [deletingSession, setDeletingSession] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
-  const activeSession = sessions.find((s) => s.id === activeId) ?? sessions[0] ?? null;
+  const activeSession =
+    sessions.find((s) => s.id === activeId) ?? sessions[0] ?? null;
 
   useEffect(() => {
     if (!dirty) return;
@@ -65,7 +90,9 @@ export function PlanBuilderPage() {
     mutation: {
       onSuccess: () => {
         toast.success("Plan updated");
-        queryClient.invalidateQueries({ queryKey: getGetPlanGetQueryKey(planId) });
+        queryClient.invalidateQueries({
+          queryKey: getGetPlanGetQueryKey(planId),
+        });
         setEditingPlan(false);
       },
       onError: (e) => toast.error(getErrorMessage(e)),
@@ -75,7 +102,9 @@ export function PlanBuilderPage() {
   const createSession = useCreateSessionPost({
     mutation: {
       onSuccess: (session) => {
-        queryClient.invalidateQueries({ queryKey: getGetSessionsGetQueryKey(planId) });
+        queryClient.invalidateQueries({
+          queryKey: getGetSessionsGetQueryKey(planId),
+        });
         setNewSessionName(null);
         setActiveId(session.id);
       },
@@ -87,7 +116,9 @@ export function PlanBuilderPage() {
     mutation: {
       onSuccess: () => {
         toast.success("Session renamed");
-        queryClient.invalidateQueries({ queryKey: getGetSessionsGetQueryKey(planId) });
+        queryClient.invalidateQueries({
+          queryKey: getGetSessionsGetQueryKey(planId),
+        });
         setRenamingSession(false);
       },
       onError: (e) => toast.error(getErrorMessage(e)),
@@ -98,7 +129,9 @@ export function PlanBuilderPage() {
     mutation: {
       onSuccess: () => {
         toast.success("Session deleted");
-        queryClient.invalidateQueries({ queryKey: getGetSessionsGetQueryKey(planId) });
+        queryClient.invalidateQueries({
+          queryKey: getGetSessionsGetQueryKey(planId),
+        });
         setActiveId(null);
         setDeletingSession(false);
       },
@@ -158,28 +191,53 @@ export function PlanBuilderPage() {
 
       <div className="mb-5 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <Eyebrow className="mb-1 block">Edit plan</Eyebrow>
+          <Eyebrow className="mb-1 block">
+            {isOwner ? "Edit plan" : "Shared plan"}
+          </Eyebrow>
           <h1 className="font-display text-fg truncate text-3xl font-bold tracking-tight">
             {plan.name}
           </h1>
-          {plan.description && <p className="text-faint mt-1 text-sm">{plan.description}</p>}
+          {plan.description && (
+            <p className="text-faint mt-1 text-sm">{plan.description}</p>
+          )}
         </div>
-        <button
-          type="button"
-          aria-label="Edit plan details"
-          onClick={() => setEditingPlan(true)}
-          className="text-faint hover:text-fg flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg"
-        >
-          <PencilIcon size={18} />
-        </button>
+        {isOwner && (
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              aria-label="Share plan"
+              onClick={() => setSharing(true)}
+              className="text-faint hover:text-fg flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg"
+            >
+              <ShareIcon size={18} />
+            </button>
+            <button
+              type="button"
+              aria-label="Edit plan details"
+              onClick={() => setEditingPlan(true)}
+              className="text-faint hover:text-fg flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg"
+            >
+              <PencilIcon size={18} />
+            </button>
+          </div>
+        )}
       </div>
 
       {sessions.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 p-10 text-center">
-          <p className="text-muted">This plan has no sessions yet.</p>
-          <Button iconLeft={<PlusIcon size={18} />} onClick={() => setNamingSession(true)}>
-            Add a session
-          </Button>
+          <p className="text-muted">
+            {isOwner
+              ? "This plan has no sessions yet."
+              : "This plan has no sessions."}
+          </p>
+          {isOwner && (
+            <Button
+              iconLeft={<PlusIcon size={18} />}
+              onClick={() => setNamingSession(true)}
+            >
+              Add a session
+            </Button>
+          )}
         </Card>
       ) : (
         <>
@@ -190,32 +248,36 @@ export function PlanBuilderPage() {
               active={activeSession!.id}
               onChange={selectSession}
             />
-            <Menu
-              triggerClassName="border-border bg-surface-2 text-muted hover:text-fg flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border"
-              label="Session actions"
-              trigger={<MoreIcon size={18} />}
-              items={[
-                {
-                  label: "Rename session",
-                  icon: <PencilIcon size={16} />,
-                  onSelect: () => setRenamingSession(true),
-                },
-                {
-                  label: "Delete session",
-                  icon: <CloseIcon size={16} />,
-                  destructive: true,
-                  onSelect: () => setDeletingSession(true),
-                },
-              ]}
-            />
-            <button
-              type="button"
-              aria-label="Add session"
-              onClick={() => setNamingSession(true)}
-              className="border-border bg-surface-2 text-muted hover:text-fg flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border"
-            >
-              <PlusIcon size={18} />
-            </button>
+            {isOwner && (
+              <>
+                <Menu
+                  triggerClassName="border-border bg-surface-2 text-muted hover:text-fg flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border"
+                  label="Session actions"
+                  trigger={<MoreIcon size={18} />}
+                  items={[
+                    {
+                      label: "Rename session",
+                      icon: <PencilIcon size={16} />,
+                      onSelect: () => setRenamingSession(true),
+                    },
+                    {
+                      label: "Delete session",
+                      icon: <CloseIcon size={16} />,
+                      destructive: true,
+                      onSelect: () => setDeletingSession(true),
+                    },
+                  ]}
+                />
+                <button
+                  type="button"
+                  aria-label="Add session"
+                  onClick={() => setNamingSession(true)}
+                  className="border-border bg-surface-2 text-muted hover:text-fg flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border"
+                >
+                  <PlusIcon size={18} />
+                </button>
+              </>
+            )}
           </div>
 
           <SessionDraftEditor
@@ -223,6 +285,7 @@ export function PlanBuilderPage() {
             planId={planId}
             session={activeSession!}
             onDirtyChange={setDirty}
+            readOnly={!isOwner}
           />
         </>
       )}
@@ -245,18 +308,28 @@ export function PlanBuilderPage() {
         open={editingPlan}
         plan={plan}
         onClose={() => setEditingPlan(false)}
-        onSubmit={(values: PlanFormValues) => updatePlan.mutate({ planId, data: values })}
+        onSubmit={(values: PlanFormValues) =>
+          updatePlan.mutate({ planId, data: values })
+        }
         isSubmitting={updatePlan.isPending}
       />
 
       {activeSession && (
         <RenameSessionModal
-          key={renamingSession ? `rename-open-${activeSession.id}` : "rename-closed"}
+          key={
+            renamingSession
+              ? `rename-open-${activeSession.id}`
+              : "rename-closed"
+          }
           open={renamingSession}
           initialName={activeSession.name}
           onClose={() => setRenamingSession(false)}
           onSubmit={(name) =>
-            renameSession.mutate({ planId, planSessionId: activeSession.id, data: { name } })
+            renameSession.mutate({
+              planId,
+              planSessionId: activeSession.id,
+              data: { name },
+            })
           }
           isSubmitting={renameSession.isPending}
         />
@@ -269,7 +342,8 @@ export function PlanBuilderPage() {
         confirmLabel="Delete"
         destructive
         onConfirm={() =>
-          activeSession && deleteSession.mutate({ planId, planSessionId: activeSession.id })
+          activeSession &&
+          deleteSession.mutate({ planId, planSessionId: activeSession.id })
         }
         onClose={() => setDeletingSession(false)}
       />
@@ -290,6 +364,15 @@ export function PlanBuilderPage() {
         onPick={createSessionWithExercise}
         usedIds={[]}
       />
+
+      {isOwner && (
+        <ShareModal
+          open={sharing}
+          onClose={() => setSharing(false)}
+          planId={planId}
+          existingShares={shares}
+        />
+      )}
     </div>
   );
 }

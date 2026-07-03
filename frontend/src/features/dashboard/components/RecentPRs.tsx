@@ -20,7 +20,7 @@ export function RecentPRs({ prs }: { prs: PersonalRecord[] }) {
         <ul className="flex flex-col">
           {prs.map((pr, i) => (
             <li
-              key={`${pr.exercise_name}-${pr.rep_label}`}
+              key={`${pr.exercise_id}-${pr.achieved_at}`}
               className="border-border flex items-center gap-3 py-3 [&:not(:last-child)]:border-b"
             >
               <span className="bg-surface-2 text-faint flex h-9 w-12 items-center justify-center rounded-md font-mono text-[11px] font-semibold">

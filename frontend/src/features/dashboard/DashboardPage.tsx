@@ -6,7 +6,11 @@ import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { PlusIcon } from "../../components/icons";
 import { formatDateLabel } from "../../lib/format";
 import { buildStartOptions } from "./startOptions";
-import { buildWeeklyVolume, computeStats, computeAllPRs } from "./aggregateStats";
+import {
+  buildWeeklyVolume,
+  computeStats,
+  computeAllPRs,
+} from "./aggregateStats";
 import { ResumeSessionCard } from "./components/ResumeSessionCard";
 import { NextWorkoutCard } from "./components/NextWorkoutCard";
 import { StartWorkoutSection } from "./components/StartWorkoutSection";
@@ -27,8 +31,12 @@ import {
 export function DashboardPage() {
   const { data: user } = useCurrentUser();
   const { data: plans } = usePlansWithSessions();
-  const { data: workout } = useGetWorkoutLogsGet({ status: WorkoutLogStatus.in_progress });
-  const { data: completedPage } = useGetWorkoutLogsGet({ status: WorkoutLogStatus.completed });
+  const { data: workout } = useGetWorkoutLogsGet({
+    status: WorkoutLogStatus.in_progress,
+  });
+  const { data: completedPage } = useGetWorkoutLogsGet({
+    status: WorkoutLogStatus.completed,
+  });
   const { namesById } = useExerciseNames();
   const navigate = useNavigate();
   const { start, isStarting } = useStartWorkout();
@@ -40,7 +48,10 @@ export function DashboardPage() {
     sessionName: string;
   } | null>(null);
 
-  const completedLogs = useMemo(() => completedPage?.items ?? [], [completedPage]);
+  const completedLogs = useMemo(
+    () => completedPage?.items ?? [],
+    [completedPage],
+  );
   const activeLog = workout?.items[0] ?? null;
   const active = activeLog ? toActiveSession(activeLog, plans) : null;
 
@@ -51,7 +62,10 @@ export function DashboardPage() {
     null;
 
   const stats = useMemo(() => computeStats(completedLogs), [completedLogs]);
-  const weeklyVolume = useMemo(() => buildWeeklyVolume(completedLogs), [completedLogs]);
+  const weeklyVolume = useMemo(
+    () => buildWeeklyVolume(completedLogs),
+    [completedLogs],
+  );
   const recentPRs = useMemo(
     () => computeAllPRs(completedLogs, namesById).slice(0, 5),
     [completedLogs, namesById],
@@ -62,7 +76,11 @@ export function DashboardPage() {
   const resume = () => {
     if (active) navigate(`/session/${active.workout_log_id}`);
   };
-  const requestStart = (_planId: string, sessionId: string, sessionName: string) => {
+  const requestStart = (
+    _planId: string,
+    sessionId: string,
+    sessionName: string,
+  ) => {
     if (isStarting) return;
     setPendingStart({ sessionId, sessionName });
   };
@@ -84,9 +102,13 @@ export function DashboardPage() {
   return (
     <div>
       <div className="mb-4 sm:mb-5">
-        <Eyebrow className="mb-1 block">{formatDateLabel(new Date().toISOString())}</Eyebrow>
+        <Eyebrow className="mb-1 block">
+          {formatDateLabel(new Date().toISOString())}
+        </Eyebrow>
         <h1 className="num text-fg text-2xl sm:text-4xl">
-          {active ? "Pick up where you left off" : `Let's train, ${greetingName}`}
+          {active
+            ? "Pick up where you left off"
+            : `Let's train, ${greetingName}`}
         </h1>
       </div>
 
@@ -100,14 +122,21 @@ export function DashboardPage() {
                 onFinish={finishActive}
                 onDiscard={() => setConfirmDiscard(true)}
               />
-              <StartWorkoutSection groups={startGroups} onStart={requestStart} />
+              <StartWorkoutSection
+                groups={startGroups}
+                onStart={requestStart}
+              />
             </>
           ) : suggested ? (
             <>
               <NextWorkoutCard
                 option={suggested}
                 onStart={() =>
-                  requestStart(suggested.plan_id, suggested.session_id, suggested.session_name)
+                  requestStart(
+                    suggested.plan_id,
+                    suggested.session_id,
+                    suggested.session_name,
+                  )
                 }
               />
               <StartWorkoutSection
@@ -156,9 +185,15 @@ function NoPlanCard({ onCreate }: { onCreate: () => void }) {
       <div className="bg-primary pointer-events-none absolute inset-x-0 top-0 h-1" />
       <h2 className="num text-fg text-3xl">No plans yet</h2>
       <p className="text-muted mx-auto mt-2 max-w-sm text-sm">
-        Build a training plan with your exercises, then start a session straight from here.
+        Build a training plan with your exercises, then start a session straight
+        from here.
       </p>
-      <Button className="mt-5" size="lg" onClick={onCreate} iconLeft={<PlusIcon size={18} />}>
+      <Button
+        className="mt-5"
+        size="lg"
+        onClick={onCreate}
+        iconLeft={<PlusIcon size={18} />}
+      >
         Create a plan
       </Button>
     </div>

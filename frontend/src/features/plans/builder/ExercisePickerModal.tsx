@@ -39,7 +39,9 @@ export function ExercisePickerModal({
   const createExercise = useCreateExercisePost({
     mutation: {
       onSuccess: (created) => {
-        queryClient.invalidateQueries({ queryKey: getGetExercisesGetQueryKey() });
+        queryClient.invalidateQueries({
+          queryKey: getGetExercisesGetQueryKey(),
+        });
         setCreating(false);
         onPick(created.id);
       },
@@ -63,7 +65,11 @@ export function ExercisePickerModal({
 
   return (
     <>
-      <Modal open={open && !creating} onClose={onClose} labelledBy="picker-title">
+      <Modal
+        open={open && !creating}
+        onClose={onClose}
+        labelledBy="picker-title"
+      >
         <h2
           id="picker-title"
           className="font-display text-fg text-2xl font-bold tracking-tight"
@@ -114,7 +120,9 @@ export function ExercisePickerModal({
                     onClick={() => onPick(ex.id)}
                     className="hover:bg-surface-2 flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-left transition-colors"
                   >
-                    <span className="text-fg truncate font-medium">{ex.name}</span>
+                    <span className="text-fg truncate font-medium">
+                      {ex.name}
+                    </span>
                     <PlusIcon size={16} className="text-faint shrink-0" />
                   </button>
                 </li>

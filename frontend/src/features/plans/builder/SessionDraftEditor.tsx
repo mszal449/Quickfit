@@ -25,10 +25,18 @@ interface SessionDraftEditorProps {
   planId: string;
   session: PlanSessionOut;
   onDirtyChange: (dirty: boolean) => void;
+  readOnly?: boolean;
 }
 
-export function SessionDraftEditor({ planId, session, onDirtyChange }: SessionDraftEditorProps) {
-  const [draft, setDraft] = useState<DraftExercise[]>(() => toDraft(session.prescription));
+export function SessionDraftEditor({
+  planId,
+  session,
+  onDirtyChange,
+  readOnly = false,
+}: SessionDraftEditorProps) {
+  const [draft, setDraft] = useState<DraftExercise[]>(() =>
+    toDraft(session.prescription),
+  );
   const [insertIndex, setInsertIndex] = useState<number | null>(null);
 
   const { namesById } = useExerciseNames();
@@ -45,7 +53,9 @@ export function SessionDraftEditor({ planId, session, onDirtyChange }: SessionDr
     mutation: {
       onSuccess: () => {
         toast.success("Session saved");
-        queryClient.invalidateQueries({ queryKey: getGetSessionsGetQueryKey(planId) });
+        queryClient.invalidateQueries({
+          queryKey: getGetSessionsGetQueryKey(planId),
+        });
         queryClient.invalidateQueries({
           queryKey: getGetSessionGetQueryKey(planId, session.id),
         });
@@ -64,7 +74,9 @@ export function SessionDraftEditor({ planId, session, onDirtyChange }: SessionDr
   };
 
   const changeExercise = (exercise: DraftExercise) => {
-    setDraft((prev) => prev.map((ex) => (ex.uid === exercise.uid ? exercise : ex)));
+    setDraft((prev) =>
+      prev.map((ex) => (ex.uid === exercise.uid ? exercise : ex)),
+    );
   };
 
   const removeExercise = (uid: string) => {
@@ -93,13 +105,17 @@ export function SessionDraftEditor({ planId, session, onDirtyChange }: SessionDr
   return (
     <div>
       {draft.length === 0 ? (
-        <button
-          type="button"
-          onClick={() => setInsertIndex(0)}
-          className="border-border-strong text-muted hover:border-primary/50 hover:text-primary flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed py-10 font-semibold transition-colors"
-        >
-          Add the first exercise
-        </button>
+        readOnly ? (
+          <p className="text-muted py-10 text-center">No exercises yet.</p>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setInsertIndex(0)}
+            className="border-border-strong text-muted hover:border-primary/50 hover:text-primary flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed py-10 font-semibold transition-colors"
+          >
+            Add the first exercise
+          </button>
+        )
       ) : (
         <SessionEditor
           exercises={draft}
@@ -108,27 +124,37 @@ export function SessionDraftEditor({ planId, session, onDirtyChange }: SessionDr
           onChangeExercise={changeExercise}
           onRemove={removeExercise}
           onInsertAt={setInsertIndex}
+          readOnly={readOnly}
         />
       )}
 
-      <div className="bg-bg/95 sticky bottom-0 z-20 mt-4 flex items-center justify-between gap-3 border-t border-border py-3 backdrop-blur"
-        style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
-      >
-        <span className="text-faint font-mono text-xs">
-          {draft.length} exercise{draft.length === 1 ? "" : "s"}
-          {dirty && " · unsaved"}
-        </span>
-        <Button onClick={handleSave} disabled={!dirty || !valid} loading={save.isPending}>
-          Save session
-        </Button>
-      </div>
+      {!readOnly && (
+        <div
+          className="bg-bg/95 border-border sticky bottom-0 z-20 mt-4 flex items-center justify-between gap-3 border-t py-3 backdrop-blur"
+          style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+        >
+          <span className="text-faint font-mono text-xs">
+            {draft.length} exercise{draft.length === 1 ? "" : "s"}
+            {dirty && " · unsaved"}
+          </span>
+          <Button
+            onClick={handleSave}
+            disabled={!dirty || !valid}
+            loading={save.isPending}
+          >
+            Save session
+          </Button>
+        </div>
+      )}
 
-      <ExercisePickerModal
-        open={insertIndex !== null}
-        onClose={() => setInsertIndex(null)}
-        onPick={pickExercise}
-        usedIds={draft.map((ex) => ex.exercise_id)}
-      />
+      {!readOnly && (
+        <ExercisePickerModal
+          open={insertIndex !== null}
+          onClose={() => setInsertIndex(null)}
+          onPick={pickExercise}
+          usedIds={draft.map((ex) => ex.exercise_id)}
+        />
+      )}
     </div>
   );
 }

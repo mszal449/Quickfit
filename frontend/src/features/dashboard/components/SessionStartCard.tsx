@@ -64,9 +64,9 @@ export function SessionStartCard({ option, onStart }: SessionStartCardProps) {
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5 px-0 pr-4 pb-3">
-        {option.exercise_preview.map((name) => (
+        {option.exercise_preview.map((name, i) => (
           <span
-            key={name}
+            key={i}
             className="bg-surface-2 text-muted rounded-md px-2 py-0.5 font-mono text-[10px]"
           >
             {name}
@@ -80,8 +80,8 @@ export function SessionStartCard({ option, onStart }: SessionStartCardProps) {
       </div>
 
       <div className="border-border/60 text-faint mt-auto border-t px-0 py-2 pr-4 font-mono text-[10px] tracking-wide">
-        {option.last_performed_at
-          ? `Last done ${relativeTime(option.last_performed_at)}`
+        {option.last_started_at
+          ? `Last done ${relativeTime(option.last_started_at)}`
           : "Not done yet"}
       </div>
     </button>

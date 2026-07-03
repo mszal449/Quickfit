@@ -39,7 +39,10 @@ export function toDraft(prescription: SessionPrescription): DraftExercise[] {
   return prescription.exercises.map((ex) => ({
     uid: nextUid(),
     exercise_id: ex.exercise_id,
-    sets: ex.sets.map((s) => ({ min_reps: s.min_reps, max_reps: s.max_reps ?? null })),
+    sets: ex.sets.map((s) => ({
+      min_reps: s.min_reps,
+      max_reps: s.max_reps ?? null,
+    })),
     description: ex.description ?? null,
   }));
 }
@@ -69,7 +72,11 @@ export function draftEquals(a: DraftExercise[], b: DraftExercise[]): boolean {
       ex.exercise_id === o.exercise_id &&
       ex.description === o.description &&
       ex.sets.length === o.sets.length &&
-      ex.sets.every((s, j) => s.min_reps === o.sets[j].min_reps && s.max_reps === o.sets[j].max_reps)
+      ex.sets.every(
+        (s, j) =>
+          s.min_reps === o.sets[j].min_reps &&
+          s.max_reps === o.sets[j].max_reps,
+      )
     );
   });
 }

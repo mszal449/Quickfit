@@ -2,7 +2,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { Tag } from "../../components/ui/Tag";
 import { TrophyIcon, CheckIcon } from "../../components/icons";
-import { formatClock, formatReps, formatTonnes, formatWeight } from "../../lib/format";
+import {
+  formatClock,
+  formatReps,
+  formatTonnes,
+  formatWeight,
+} from "../../lib/format";
 import { cn } from "../../lib/cn";
 import type { WorkoutSummary } from "./buildSummary";
 
@@ -13,7 +18,8 @@ interface SummaryLocationState {
 export function WorkoutSummaryPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const summary = (location.state as SummaryLocationState | null)?.summary ?? null;
+  const summary =
+    (location.state as SummaryLocationState | null)?.summary ?? null;
 
   if (!summary) {
     return (
@@ -29,7 +35,9 @@ export function WorkoutSummaryPage() {
   }
 
   const completion =
-    summary.setsPlanned > 0 ? Math.round((summary.setsLogged / summary.setsPlanned) * 100) : 0;
+    summary.setsPlanned > 0
+      ? Math.round((summary.setsLogged / summary.setsPlanned) * 100)
+      : 0;
 
   return (
     <div className="bg-bg flex min-h-dvh flex-col">
@@ -46,8 +54,15 @@ export function WorkoutSummaryPage() {
 
         <div className="border-border bg-surface mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border">
           <Stat label="Time" value={formatClock(summary.elapsedSeconds)} />
-          <Stat label="Volume" value={`${formatTonnes(summary.totalVolumeKg)} t`} />
-          <Stat label="Sets" value={`${summary.setsLogged}/${summary.setsPlanned}`} sub={`${completion}%`} />
+          <Stat
+            label="Volume"
+            value={`${formatTonnes(summary.totalVolumeKg)} t`}
+          />
+          <Stat
+            label="Sets"
+            value={`${summary.setsLogged}/${summary.setsPlanned}`}
+            sub={`${completion}%`}
+          />
         </div>
 
         {summary.prCount > 0 && (
@@ -67,12 +82,16 @@ export function WorkoutSummaryPage() {
               key={ex.exercise_id}
               className={cn(
                 "flex items-center gap-3 rounded-2xl border px-4 py-3",
-                ex.isPr ? "border-warning/40 bg-warning-soft" : "border-border bg-surface",
+                ex.isPr
+                  ? "border-warning/40 bg-warning-soft"
+                  : "border-border bg-surface",
               )}
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-fg truncate text-sm font-semibold">{ex.name}</span>
+                  <span className="text-fg truncate text-sm font-semibold">
+                    {ex.name}
+                  </span>
                   {ex.isPr && (
                     <span className="bg-warning text-primary-fg inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold tracking-wide uppercase">
                       <TrophyIcon size={11} />
@@ -94,17 +113,26 @@ export function WorkoutSummaryPage() {
                     ex.isPr ? "text-warning" : "text-fg",
                   )}
                 >
-                  {ex.topWeight != null ? `${formatWeight(ex.topWeight)} kg` : "—"}
+                  {ex.topWeight != null
+                    ? `${formatWeight(ex.topWeight)} kg`
+                    : "—"}
                 </div>
                 {ex.topReps != null && (
-                  <div className="text-faint font-mono text-xs">{formatReps(ex.topReps)} reps</div>
+                  <div className="text-faint font-mono text-xs">
+                    {formatReps(ex.topReps)} reps
+                  </div>
                 )}
               </div>
             </div>
           ))}
         </div>
 
-        <Button size="lg" fullWidth className="mt-6" onClick={() => navigate("/dashboard")}>
+        <Button
+          size="lg"
+          fullWidth
+          className="mt-6"
+          onClick={() => navigate("/dashboard")}
+        >
           Done
         </Button>
       </main>
@@ -112,10 +140,20 @@ export function WorkoutSummaryPage() {
   );
 }
 
-function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function Stat({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+}) {
   return (
     <div className="bg-surface flex flex-col items-center gap-0.5 px-2 py-4">
-      <span className="text-faint font-mono text-[10px] tracking-wide uppercase">{label}</span>
+      <span className="text-faint font-mono text-[10px] tracking-wide uppercase">
+        {label}
+      </span>
       <span className="num text-fg text-xl">{value}</span>
       {sub && <Tag tone="muted">{sub}</Tag>}
     </div>

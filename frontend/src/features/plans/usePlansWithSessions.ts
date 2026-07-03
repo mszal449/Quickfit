@@ -2,6 +2,7 @@ import { useQueries } from "@tanstack/react-query";
 import { useGetPlansGet } from "../../api/generated/plan/plan";
 import { getGetSessionsGetQueryOptions } from "../../api/generated/plan-session/plan-session";
 import type {
+  GetPlansGetParams,
   PlanOut,
   PlanSessionOut,
 } from "../../api/generated/quickfitApi.schemas";
@@ -10,8 +11,8 @@ export interface PlanWithSessions extends PlanOut {
   sessions: PlanSessionOut[];
 }
 
-export function usePlansWithSessions() {
-  const { data: plansPage, isLoading: plansLoading } = useGetPlansGet();
+export function usePlansWithSessions(filters?: GetPlansGetParams) {
+  const { data: plansPage, isLoading: plansLoading } = useGetPlansGet(filters);
   const plans = plansPage?.items ?? [];
 
   const sessionQueries = useQueries({

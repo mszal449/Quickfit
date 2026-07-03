@@ -80,8 +80,11 @@ class WorkoutLogCreate(BaseModel):
     plan_session_id: uuid.UUID | None = Field(
         default=None, description="Plan session this workout was performed against, if any"
     )
-    performed_at: datetime | None = Field(
-        default=None, description="When the workout happened; defaults to now"
+    started_at: datetime | None = Field(
+        default=None, description="When the workout started; defaults to now"
+    )
+    completed_at: datetime | None = Field(
+        default=None, description="When the workout finished, if already completed"
     )
     notes: str | None = Field(default=None, min_length=1)
     exercises: list[ExerciseLogEntry] = Field(
@@ -97,7 +100,8 @@ class WorkoutLogCreate(BaseModel):
 
 
 class WorkoutLogUpdate(BaseModel):
-    performed_at: datetime | None = Field(default=None, description="Leave unset to keep as-is")
+    started_at: datetime | None = Field(default=None, description="Leave unset to keep as-is")
+    completed_at: datetime | None = Field(default=None, description="Leave unset to keep as-is")
     notes: str | None = Field(
         default=None, min_length=1, description="Omit to keep as-is; send null to clear"
     )
@@ -121,7 +125,8 @@ class WorkoutLogOut(BaseModel):
     plan_id: uuid.UUID | None
     plan_session_id: uuid.UUID | None
     status: WorkoutLogStatus
-    performed_at: datetime
+    started_at: datetime
+    completed_at: datetime | None
     notes: str | None
     sets: list[SetLogOut]
 

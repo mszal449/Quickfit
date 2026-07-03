@@ -68,7 +68,7 @@ export function buildLiveModel(
     status: workoutLog.status,
     plan_name: planName,
     session_name: session.name,
-    performed_at: workoutLog.performed_at,
+    started_at: workoutLog.started_at,
     exercises,
   };
 }

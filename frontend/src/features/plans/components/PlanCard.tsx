@@ -2,13 +2,18 @@ import { Link } from "react-router-dom";
 import { Card } from "../../../components/ui/Card";
 import { Tag } from "../../../components/ui/Tag";
 import { Menu } from "../../../components/ui/Menu";
-import { ArrowRightIcon, LinkIcon, MoreIcon, CloseIcon } from "../../../components/icons";
+import {
+  ArrowRightIcon,
+  LinkIcon,
+  MoreIcon,
+  CloseIcon,
+} from "../../../components/icons";
 import { PlanVisibility } from "../../../api/generated/quickfitApi.schemas";
 import type { PlanWithSessions } from "../usePlansWithSessions";
 
 interface PlanCardProps {
   plan: PlanWithSessions;
-  onDelete: () => void;
+  onDelete?: () => void;
 }
 
 const MAX_VISIBLE_SESSIONS = 3;
@@ -40,7 +45,9 @@ export function PlanCard({ plan, onDelete }: PlanCardProps) {
             )}
           </div>
 
-          <p className="text-muted mt-2 line-clamp-2 min-h-10 text-sm">{plan.description}</p>
+          <p className="text-muted mt-2 line-clamp-2 min-h-10 text-sm">
+            {plan.description}
+          </p>
 
           <div className="mt-1 flex min-h-7 flex-wrap items-start gap-1.5">
             {visibleSessions.map((s) => (
@@ -66,19 +73,21 @@ export function PlanCard({ plan, onDelete }: PlanCardProps) {
         </Card>
       </Link>
 
-      <Menu
-        className="absolute top-3 right-3"
-        label={`Actions for ${plan.name}`}
-        trigger={<MoreIcon size={18} />}
-        items={[
-          {
-            label: "Delete plan",
-            icon: <CloseIcon size={16} />,
-            destructive: true,
-            onSelect: onDelete,
-          },
-        ]}
-      />
+      {onDelete && (
+        <Menu
+          className="absolute top-3 right-3"
+          label={`Actions for ${plan.name}`}
+          trigger={<MoreIcon size={18} />}
+          items={[
+            {
+              label: "Delete plan",
+              icon: <CloseIcon size={16} />,
+              destructive: true,
+              onSelect: onDelete,
+            },
+          ]}
+        />
+      )}
     </div>
   );
 }

@@ -200,6 +200,15 @@ export const LinkIcon = (p: IconProps) => (
   </Base>
 );
 
+export const ShareIcon = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="18" cy="5" r="2.75" />
+    <circle cx="6" cy="12" r="2.75" />
+    <circle cx="18" cy="19" r="2.75" />
+    <path d="M8.5 10.7l7-4.1M8.5 13.3l7 4.1" />
+  </Base>
+);
+
 export const UserIcon = (p: IconProps) => (
   <Base {...p}>
     <circle cx="12" cy="8" r="4" />

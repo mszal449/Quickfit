@@ -130,7 +130,9 @@ export function MuscleGroupSelect({ value, onChange }: MuscleGroupSelectProps) {
                   }}
                   className={cn(
                     "flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors",
-                    isSelected ? "text-primary bg-primary-soft" : "text-fg hover:bg-surface-3",
+                    isSelected
+                      ? "text-primary bg-primary-soft"
+                      : "text-fg hover:bg-surface-3",
                   )}
                 >
                   {LABELS[mg]}

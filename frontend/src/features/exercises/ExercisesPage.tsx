@@ -8,7 +8,13 @@ import { Skeleton } from "../../components/ui/Skeleton";
 import { SegmentedTabs } from "../../components/ui/SegmentedTabs";
 import { Menu } from "../../components/ui/Menu";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
-import { PlusIcon, SearchIcon, MoreIcon, PencilIcon, CloseIcon } from "../../components/icons";
+import {
+  PlusIcon,
+  SearchIcon,
+  MoreIcon,
+  PencilIcon,
+  CloseIcon,
+} from "../../components/icons";
 import { useToast } from "../../components/ui/useToast";
 import { getErrorMessage } from "../../api/client";
 import {
@@ -19,8 +25,14 @@ import {
   getGetExercisesGetQueryKey,
 } from "../../api/generated/exercise/exercise";
 import { useQueryClient } from "@tanstack/react-query";
-import { ExerciseCategory, type ExerciseOut } from "../../api/generated/quickfitApi.schemas";
-import { ExerciseFormModal, type ExerciseFormValues } from "./ExerciseFormModal";
+import {
+  ExerciseCategory,
+  type ExerciseOut,
+} from "../../api/generated/quickfitApi.schemas";
+import {
+  ExerciseFormModal,
+  type ExerciseFormValues,
+} from "./ExerciseFormModal";
 
 const MUSCLE_GROUP_LABELS: Record<string, string> = {
   chest: "Chest",
@@ -89,10 +101,13 @@ export function ExercisesPage() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return exercises.filter((ex) => {
-      if (categoryFilter !== "all" && ex.category !== categoryFilter) return false;
+      if (categoryFilter !== "all" && ex.category !== categoryFilter)
+        return false;
       if (!q) return true;
       return (
-        ex.name.toLowerCase().includes(q) || ex.description?.toLowerCase().includes(q) || false
+        ex.name.toLowerCase().includes(q) ||
+        ex.description?.toLowerCase().includes(q) ||
+        false
       );
     });
   }, [exercises, search, categoryFilter]);
@@ -111,7 +126,10 @@ export function ExercisesPage() {
       <PageHeader
         title="Exercises"
         actions={
-          <Button iconLeft={<PlusIcon size={18} />} onClick={() => setCreating(true)}>
+          <Button
+            iconLeft={<PlusIcon size={18} />}
+            onClick={() => setCreating(true)}
+          >
             <span className="hidden sm:inline">New exercise</span>
             <span className="sm:hidden">New</span>
           </Button>
@@ -170,11 +188,19 @@ export function ExercisesPage() {
                   {ex.name}
                 </div>
                 {ex.description && (
-                  <div className="text-faint truncate text-sm">{ex.description}</div>
+                  <div className="text-faint truncate text-sm">
+                    {ex.description}
+                  </div>
                 )}
               </Link>
-              <Tag tone={ex.category === ExerciseCategory.cardio ? "primary" : "muted"}>
-                {ex.muscle_group ? MUSCLE_GROUP_LABELS[ex.muscle_group] : "Cardio"}
+              <Tag
+                tone={
+                  ex.category === ExerciseCategory.cardio ? "primary" : "muted"
+                }
+              >
+                {ex.muscle_group
+                  ? MUSCLE_GROUP_LABELS[ex.muscle_group]
+                  : "Cardio"}
               </Tag>
               <Menu
                 trigger={<MoreIcon size={18} />}
@@ -221,7 +247,9 @@ export function ExercisesPage() {
         description="It'll be hidden from your library. Past workouts that used it are unaffected."
         confirmLabel="Archive"
         destructive
-        onConfirm={() => deleting && deleteExercise.mutate({ exerciseId: deleting.id })}
+        onConfirm={() =>
+          deleting && deleteExercise.mutate({ exerciseId: deleting.id })
+        }
         onClose={() => setDeleting(null)}
       />
     </div>

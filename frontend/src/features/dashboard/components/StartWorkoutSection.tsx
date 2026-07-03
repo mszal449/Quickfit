@@ -44,7 +44,9 @@ export function StartWorkoutSection({
           <SessionStartCard
             key={option.session_id}
             option={option}
-            onStart={() => onStart(option.plan_id, option.session_id, option.session_name)}
+            onStart={() =>
+              onStart(option.plan_id, option.session_id, option.session_name)
+            }
           />
         ))}
       </div>

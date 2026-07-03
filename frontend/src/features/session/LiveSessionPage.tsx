@@ -53,7 +53,7 @@ export function LiveSessionPage() {
   const [exerciseIndex, setExerciseIndex] = useState(0);
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [confirmFinish, setConfirmFinish] = useState(false);
-  const elapsed = useElapsedSeconds(model?.performed_at);
+  const elapsed = useElapsedSeconds(model?.started_at);
 
   const exerciseCount = model?.exercises.length ?? 0;
   const lastIndex = exerciseCount - 1;
@@ -175,7 +175,9 @@ export function LiveSessionPage() {
   const confirmFinishWorkout = () => {
     const summary = buildSummary(model, elapsed);
     finish(workoutLogId)
-      .then(() => navigate(`/session/${workoutLogId}/summary`, { state: { summary } }))
+      .then(() =>
+        navigate(`/session/${workoutLogId}/summary`, { state: { summary } }),
+      )
       .catch(() => {});
   };
 

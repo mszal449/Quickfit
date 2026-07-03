@@ -17,6 +17,7 @@ from friend import router as friend_router
 from health import router as health_router
 from plan import router as plan_router
 from plan_session import router as plan_session_router
+from plan_share import router as plan_share_router
 from workout_log import router as workout_log_router
 
 LOG = get_logger()
@@ -102,6 +103,7 @@ def register_routers(app: FastAPI):
     api_router.include_router(auth_router.router)
     api_router.include_router(plan_router.router)
     api_router.include_router(plan_session_router.router)
+    api_router.include_router(plan_share_router.router)
     api_router.include_router(exercise_router.router)
     api_router.include_router(workout_log_router.router)
     api_router.include_router(friend_router.router)
