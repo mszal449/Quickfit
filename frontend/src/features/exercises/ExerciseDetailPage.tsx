@@ -93,7 +93,7 @@ export function ExerciseDetailPage() {
         <Card className="text-muted p-10 text-center">
           Exercise not found.
           <div className="mt-3">
-            <Button variant="secondary" onClick={() => navigate("/exercises")}>
+            <Button variant="secondary" onClick={() => navigate(-1)}>
               Back
             </Button>
           </div>
@@ -105,10 +105,10 @@ export function ExerciseDetailPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <button
-        onClick={() => navigate("/exercises")}
+        onClick={() => navigate(-1)}
         className="text-muted hover:text-fg mb-3 flex cursor-pointer items-center gap-1 text-sm font-medium"
       >
-        <ChevronLeftIcon size={18} /> Exercises
+        <ChevronLeftIcon size={18} /> Back
       </button>
 
       <div className="mb-5">

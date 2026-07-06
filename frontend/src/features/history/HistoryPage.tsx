@@ -7,7 +7,12 @@ import { Tag } from "../../components/ui/Tag";
 import { Menu } from "../../components/ui/Menu";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Skeleton } from "../../components/ui/Skeleton";
-import { CalendarIcon, CloseIcon, MoreIcon } from "../../components/icons";
+import {
+  CalendarIcon,
+  ChevronRightIcon,
+  CloseIcon,
+  MoreIcon,
+} from "../../components/icons";
 import { useToast } from "../../components/ui/useToast";
 import { getErrorMessage } from "../../api/client";
 import {
@@ -82,9 +87,10 @@ export function HistoryPage() {
                       <Link key={ex.id} to={`/exercises/${ex.id}`}>
                         <Tag
                           tone="muted"
-                          className="hover:text-primary cursor-pointer transition-colors"
+                          className="border-border-strong hover:border-primary/60 hover:bg-surface-3 hover:text-primary border transition-colors"
                         >
                           {ex.name}
+                          <ChevronRightIcon size={11} />
                         </Tag>
                       </Link>
                     ))}
