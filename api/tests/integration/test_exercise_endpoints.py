@@ -47,13 +47,14 @@ async def test_create_exercise_same_name_different_owner_ok(
     assert second.status_code == 201
 
 
-async def test_list_exercises_only_returns_own(
+async def test_list_exercises_returns_own_and_global_not_others(
     client: AsyncClient, db_session: AsyncSession, user: User, other_user: User
 ):
     db_session.add_all(
         [
             Exercise(owner_id=user.id, name="Mine"),
             Exercise(owner_id=other_user.id, name="Not mine"),
+            Exercise(owner_id=None, name="Global One"),
         ]
     )
     await db_session.flush()
@@ -61,9 +62,10 @@ async def test_list_exercises_only_returns_own(
     resp = await client.get("/api/exercise")
 
     assert resp.status_code == 200
-    body = resp.json()
-    assert body["total"] == 1
-    assert [e["name"] for e in body["items"]] == ["Mine"]
+    names = [e["name"] for e in resp.json()["items"]]
+    assert "Mine" in names
+    assert "Global One" in names
+    assert "Not mine" not in names
 
 
 async def test_list_exercises_excludes_archived(
@@ -75,7 +77,7 @@ async def test_list_exercises_excludes_archived(
     resp = await client.get("/api/exercise")
 
     assert resp.status_code == 200
-    assert resp.json()["total"] == 0
+    assert "Archived" not in [e["name"] for e in resp.json()["items"]]
 
 
 async def test_get_exercise_any_owner_by_id(
