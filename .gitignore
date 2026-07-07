@@ -6,3 +6,4 @@ context
 .vscode
 *CLAUDE.md
 .local-image-tag
+kubeconfig.yaml

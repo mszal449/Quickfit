@@ -134,7 +134,9 @@ jobs:
           context: ./api
           target: runtime
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${{ github.sha }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${{ github.sha }}
+            ${{ startsWith(github.ref, 'refs/tags/') && format('{0}/{1}:{2}', env.REGISTRY, env.IMAGE_NAME_API, github.ref_name) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -143,6 +145,63 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ github.sha }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ github.sha }}
+            ${{ startsWith(github.ref, 'refs/tags/') && format('{0}/{1}:{2}', env.REGISTRY, env.IMAGE_NAME_FRONTEND, github.ref_name) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    needs: [test, build-push]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.ref_name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Set up kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+
+      - name: Apply prod secrets
+        run: |
+          kubectl create secret generic postgres-secret \
+            --from-literal=POSTGRES_USER="${{ secrets.PROD_POSTGRES_USER }}" \
+            --from-literal=POSTGRES_PASSWORD="${{ secrets.PROD_POSTGRES_PASSWORD }}" \
+            --from-literal=POSTGRES_DB="${{ secrets.PROD_POSTGRES_DB }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret generic backend-secret \
+            --from-literal=DB_URL="postgresql+asyncpg://${{ secrets.PROD_POSTGRES_USER }}:${{ secrets.PROD_POSTGRES_PASSWORD }}@postgres:5432/${{ secrets.PROD_POSTGRES_DB }}" \
+            --from-literal=JWT_SECRET="${{ secrets.PROD_JWT_SECRET }}" \
+            --from-literal=GOOGLE_CLIENT_ID="${{ secrets.PROD_GOOGLE_CLIENT_ID }}" \
+            --from-literal=GOOGLE_CLIENT_SECRET="${{ secrets.PROD_GOOGLE_CLIENT_SECRET }}" \
+            --from-literal=GOOGLE_REDIRECT_URI="${{ secrets.PROD_GOOGLE_REDIRECT_URI }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Run migrations
+        run: |
+          kubectl delete job migrate-${TAG} --ignore-not-found
+          kubectl create job migrate-${TAG} --image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${TAG} -- alembic upgrade head
+          kubectl wait --for=condition=complete job/migrate-${TAG} --timeout=120s
+
+      - name: Deploy
+        working-directory: k8s/overlays/prod
+        run: |
+          kustomize edit set image | 
+            quickfit-api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${TAG} |
+            quickfit-frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${TAG}
+          kubectl apply -k .
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/backend --timeout=120s
+          kubectl rollout status deployment/frontend --timeout=120s
