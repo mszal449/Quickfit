@@ -9,6 +9,8 @@ from common.db import integrity_error_constraint
 from common.exceptions import ConflictError, NotFoundError
 from exercise.schema import ExerciseCreate, ExerciseOut, ExerciseUpdate
 from models.exercise import Exercise, ExerciseCategory
+from models.plan_session import PlanSession
+from models.plan_share import PlanShare, PlanShareStatus
 
 LOG = get_logger()
 
@@ -28,13 +30,33 @@ async def _get_owned_exercise(db: AsyncSession, user_id: UUID, exercise_id: UUID
     return exercise
 
 
-async def list_user_exercises(db: AsyncSession, user_id: UUID) -> list[ExerciseOut]:
+async def _shared_plan_exercise_ids(db: AsyncSession, user_id: UUID) -> set[UUID]:
+    req = await db.execute(
+        select(PlanSession.prescription)
+        .join(PlanShare, PlanShare.plan_id == PlanSession.plan_id)
+        .where(
+            PlanShare.shared_with_user_id == user_id,
+            PlanShare.status == PlanShareStatus.ACCEPTED,
+        )
+    )
+    return {
+        UUID(exercise["exercise_id"])
+        for prescription in req.scalars().all()
+        for exercise in prescription.get("exercises", [])
+    }
+
+
+async def list_user_exercises(
+    db: AsyncSession, user_id: UUID, include_shared: bool = False
+) -> list[ExerciseOut]:
+    accessible = [Exercise.owner_id == user_id, Exercise.owner_id.is_(None)]
+    if include_shared:
+        shared_ids = await _shared_plan_exercise_ids(db, user_id)
+        if shared_ids:
+            accessible.append(Exercise.id.in_(shared_ids))
     req = await db.execute(
         select(Exercise)
-        .where(
-            or_(Exercise.owner_id == user_id, Exercise.owner_id.is_(None)),
-            Exercise.is_archived.is_(False),
-        )
+        .where(or_(*accessible), Exercise.is_archived.is_(False))
         .order_by(Exercise.name)
     )
     return [ExerciseOut.model_validate(e) for e in req.scalars().all()]

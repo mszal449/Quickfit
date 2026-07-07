@@ -14,8 +14,10 @@ router = APIRouter(prefix="/exercise", tags=["exercise"])
 
 
 @router.get("", response_model=Page[ExerciseOut])
-async def get_exercises(user_id: CurrentUserId, db: DbSession) -> Page[ExerciseOut]:
-    exercises = await service.list_user_exercises(db, user_id)
+async def get_exercises(
+    user_id: CurrentUserId, db: DbSession, include_shared: bool = False
+) -> Page[ExerciseOut]:
+    exercises = await service.list_user_exercises(db, user_id, include_shared=include_shared)
     return Page[ExerciseOut](items=exercises, total=len(exercises))
 
 

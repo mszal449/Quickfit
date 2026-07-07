@@ -28,6 +28,7 @@ import type {
   ExerciseCreate,
   ExerciseOut,
   ExerciseUpdate,
+  GetExercisesGetParams,
   HTTPValidationError,
   PageExerciseOut
 } from '../quickfitApi.schemas';
@@ -43,13 +44,14 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * @summary Get Exercises
  */
 export const getExercisesGet = (
-    
+    params?: GetExercisesGetParams,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
       
       
       return customFetch<PageExerciseOut>(
-      {url: `/api/exercise`, method: 'GET', signal
+      {url: `/api/exercise`, method: 'GET',
+        params, signal
     },
       options);
     }
@@ -57,23 +59,23 @@ export const getExercisesGet = (
 
 
 
-export const getGetExercisesGetQueryKey = () => {
+export const getGetExercisesGetQueryKey = (params?: GetExercisesGetParams,) => {
     return [
-    `/api/exercise`
+    `/api/exercise`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getGetExercisesGetQueryOptions = <TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetExercisesGetQueryOptions = <TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = HTTPValidationError>(params?: GetExercisesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetExercisesGetQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetExercisesGetQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExercisesGet>>> = ({ signal }) => getExercisesGet(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExercisesGet>>> = ({ signal }) => getExercisesGet(params, requestOptions, signal);
 
       
 
@@ -83,11 +85,11 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type GetExercisesGetQueryResult = NonNullable<Awaited<ReturnType<typeof getExercisesGet>>>
-export type GetExercisesGetQueryError = unknown
+export type GetExercisesGetQueryError = HTTPValidationError
 
 
-export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>> & Pick<
+export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = HTTPValidationError>(
+ params: undefined |  GetExercisesGetParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getExercisesGet>>,
           TError,
@@ -96,8 +98,8 @@ export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercise
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>> & Pick<
+export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = HTTPValidationError>(
+ params?: GetExercisesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getExercisesGet>>,
           TError,
@@ -106,20 +108,20 @@ export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercise
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = HTTPValidationError>(
+ params?: GetExercisesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get Exercises
  */
 
-export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetExercisesGet<TData = Awaited<ReturnType<typeof getExercisesGet>>, TError = HTTPValidationError>(
+ params?: GetExercisesGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercisesGet>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetExercisesGetQueryOptions(options)
+  const queryOptions = getGetExercisesGetQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

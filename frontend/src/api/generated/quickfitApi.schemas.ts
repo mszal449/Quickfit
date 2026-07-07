@@ -631,6 +631,10 @@ plan_id?: string | null;
 status?: PlanShareStatus | null;
 };
 
+export type GetExercisesGetParams = {
+include_shared?: boolean;
+};
+
 export type GetWorkoutLogsGetParams = {
 /**
  * Filter by workout log status

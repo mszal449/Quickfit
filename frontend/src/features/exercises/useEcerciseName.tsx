@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useGetExercisesGet } from "../../api/generated/exercise/exercise";
 
 export function useExerciseNames() {
-  const { data, isLoading } = useGetExercisesGet();
+  const { data, isLoading } = useGetExercisesGet({ include_shared: true });
 
   const namesById = useMemo(() => {
     const map = new Map<string, string>();
