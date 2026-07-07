@@ -21,7 +21,7 @@ patches:
         value: nginx
       - op: replace
         path: /spec/rules/0/host
-        value: 138.68.115.239.sslip.io
+        value: gohtonomi.com
 
   - target:
       kind: Deployment

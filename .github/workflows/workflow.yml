@@ -200,6 +200,7 @@ jobs:
           metadata:
             name: migrate-${SAFE_TAG}
           spec:
+            ttlSecondsAfterFinish: 300
             backoffLimit: 2
             template:
               spec:
