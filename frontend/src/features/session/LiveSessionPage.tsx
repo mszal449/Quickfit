@@ -19,7 +19,10 @@ import { RestTimerBar } from "./components/RestTimerBar";
 import { buildSummary } from "./buildSummary";
 import { useGetWorkoutLogsGet } from "../../api/generated/workout-log/workout-log";
 import { useGetExercisesGet } from "../../api/generated/exercise/exercise";
-import { ExerciseCategory, WorkoutLogStatus } from "../../api/generated/quickfitApi.schemas";
+import {
+  ExerciseCategory,
+  WorkoutLogStatus,
+} from "../../api/generated/quickfitApi.schemas";
 import { buildExerciseProgressSeries } from "../dashboard/aggregateStats";
 import { ExerciseProgressChart } from "../../components/charts/ExerciseProgressChart";
 import type { LiveExercise, LiveSetRow } from "./types";

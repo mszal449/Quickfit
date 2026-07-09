@@ -15,6 +15,12 @@ import { getErrorMessage } from "../../api/client";
 import { useToast } from "../../components/ui/useToast";
 import { useDeleteMeDelete } from "../../api/generated/auth/auth";
 import {
+  connectGoogleHealth,
+  useDisconnectIntegration,
+  useIntegrationStatus,
+  useIntegrationWorkouts,
+} from "./useGoogleHealth";
+import {
   getUnits,
   setUnits as persistUnits,
   type Units,
@@ -41,6 +47,11 @@ export function AccountPage() {
       onError: (e) => toast.error(getErrorMessage(e)),
     },
   });
+
+  const integration = useIntegrationStatus();
+  const connected = integration.data?.connected ?? false;
+  const disconnect = useDisconnectIntegration();
+  const workouts = useIntegrationWorkouts(connected);
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -144,6 +155,65 @@ export function AccountPage() {
             </Button>
           </SettingRow>
         </Card>
+      </div>
+
+      <div className="mt-8">
+        <SectionLabel>Integrations</SectionLabel>
+        <Card className="divide-border divide-y p-0">
+          <SettingRow
+            label="Google Health"
+            description={
+              integration.isLoading
+                ? "Checking connection…"
+                : connected
+                  ? (integration.data?.scope_granted ?? "Connected")
+                  : "Sync workouts from Google Health / Fitbit"
+            }
+          >
+            {integration.isLoading ? (
+              <Skeleton className="h-8 w-24" />
+            ) : connected ? (
+              <div className="flex items-center gap-2">
+                <Tag tone="success">Connected</Tag>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  loading={disconnect.isPending}
+                  onClick={() =>
+                    disconnect.mutate(undefined, {
+                      onError: (e) => toast.error(getErrorMessage(e)),
+                    })
+                  }
+                >
+                  Disconnect
+                </Button>
+              </div>
+            ) : (
+              <Button size="sm" onClick={connectGoogleHealth}>
+                Connect
+              </Button>
+            )}
+          </SettingRow>
+        </Card>
+
+        {connected && (
+          <Card className="mt-3 p-4">
+            <div className="text-faint mb-2 font-mono text-[11px] tracking-wide uppercase">
+              Workout data (test)
+            </div>
+            {workouts.isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : workouts.error ? (
+              <div className="text-danger text-xs">
+                {getErrorMessage(workouts.error)}
+              </div>
+            ) : (
+              <pre className="bg-surface-2 text-muted max-h-80 overflow-auto rounded-lg p-3 text-xs">
+                {JSON.stringify(workouts.data, null, 2)}
+              </pre>
+            )}
+          </Card>
+        )}
       </div>
 
       <div className="mt-8">

@@ -92,7 +92,10 @@ export function useWorkoutHistory() {
           total_volume_kg,
           top_exercises: orderedExerciseIds
             .slice(0, MAX_TOP_EXERCISES)
-            .map((id) => ({ id, name: exerciseNameById.get(id) ?? "Exercise" })),
+            .map((id) => ({
+              id,
+              name: exerciseNameById.get(id) ?? "Exercise",
+            })),
         };
       });
   }, [logsPage, planNameById, sessionNameById, exerciseNameById]);

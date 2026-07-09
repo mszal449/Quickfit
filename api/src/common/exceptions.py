@@ -16,3 +16,11 @@ class ConflictError(AppError):
 
 class ForbiddenError(AppError):
     pass
+
+
+class UnauthorizedError(AppError):
+    pass
+
+
+class ExternalServiceError(AppError):
+    pass

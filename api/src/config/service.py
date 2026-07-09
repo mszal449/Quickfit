@@ -1,8 +1,10 @@
+import binascii
+from base64 import b64decode
 from functools import lru_cache
 from ipaddress import IPv4Address
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
@@ -29,6 +31,7 @@ class GoogleOAuthConfig(EnvBaseSettings):
     google_client_id: str
     google_client_secret: str
     google_redirect_uri: str
+    google_health_redirect_uri: str
 
 
 class ServiceConfig(EnvBaseSettings):
@@ -40,6 +43,18 @@ class ServiceConfig(EnvBaseSettings):
     jwt: AuthConfig = Field(default_factory=AuthConfig)  # type: ignore[call-arg]
     db_config: DatabaseConfig = Field(default_factory=DatabaseConfig)
     google_oauth_config: GoogleOAuthConfig = Field(default_factory=GoogleOAuthConfig)  # type: ignore[call-arg]
+    integration_secret: bytes
+
+    @field_validator("integration_secret", mode="before")
+    @classmethod
+    def _validate_len(cls, value: str) -> bytes:
+        try:
+            decoded = b64decode(value)
+        except binascii.Error as e:
+            raise ValueError("INTEGRATION_SECRET must be valid Base64 value") from e
+        if len(decoded) != 32:
+            raise ValueError("INTEGRATION_SECRET must be 32 chars")
+        return decoded
 
 
 @lru_cache

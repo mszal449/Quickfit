@@ -22,7 +22,7 @@ tasks:
 
   lint:api:
     dir: "api"
-    cmd: uv run ruff check .
+    cmd: uv run ruff check . --fix
 
   lint:frontend:
     dir: "frontend"
@@ -124,4 +124,5 @@ tasks:
         --from-literal=GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
         --from-literal=GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
         --from-literal=GOOGLE_REDIRECT_URI=$GOOGLE_REDIRECT_URI
+        --from-literal=INTEGRATION_SECRET=$INTEGRATION_SECRET
         --dry-run=client -o yaml | kubectl apply -f -

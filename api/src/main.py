@@ -8,12 +8,20 @@ from fastapi.routing import APIRoute
 from structlog import get_logger
 
 from auth import router as auth_router
-from common.exceptions import AppError, ConflictError, ForbiddenError, NotFoundError
+from common.exceptions import (
+    AppError,
+    ConflictError,
+    ExternalServiceError,
+    ForbiddenError,
+    NotFoundError,
+    UnauthorizedError,
+)
 from config.db import close_db, init_db
 from config.middleware import DbSessionMiddleware, RequestLoggingMiddleware
 from config.service import get_config
 from exercise import router as exercise_router
 from friend import router as friend_router
+from google_health import router as google_health_router
 from health import router as health_router
 from plan import router as plan_router
 from plan_session import router as plan_session_router
@@ -33,6 +41,8 @@ _STATUS_BY_EXCEPTION: dict[type[AppError], int] = {
     NotFoundError: status.HTTP_404_NOT_FOUND,
     ConflictError: status.HTTP_409_CONFLICT,
     ForbiddenError: status.HTTP_403_FORBIDDEN,
+    UnauthorizedError: status.HTTP_401_UNAUTHORIZED,
+    ExternalServiceError: status.HTTP_502_BAD_GATEWAY,
 }
 
 
@@ -107,4 +117,5 @@ def register_routers(app: FastAPI):
     api_router.include_router(exercise_router.router)
     api_router.include_router(workout_log_router.router)
     api_router.include_router(friend_router.router)
+    api_router.include_router(google_health_router.router)
     app.include_router(api_router)
