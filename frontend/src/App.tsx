@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { RouteMemory } from "./components/RouteMemory";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { NotFoundPage } from "./components/NotFoundPage";
@@ -22,6 +23,7 @@ function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
+        <RouteMemory />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
