@@ -4,7 +4,7 @@ services:
     build:
       context: .
       target: test
-    
+
     entrypoint: ["uv", "run", "pytest", "tests/unit"]
 
   db-test:
@@ -33,4 +33,5 @@ services:
       GOOGLE_CLIENT_ID: test-client-id
       GOOGLE_CLIENT_SECRET: test-client-secret
       GOOGLE_REDIRECT_URI: http://localhost/callback
+      GOOGLE_HEALTH_REDIRECT_URI: http://localhost/callback/health
     entrypoint: ["uv", "run", "pytest", "tests/integration"]
