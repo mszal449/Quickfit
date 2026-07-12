@@ -20,11 +20,9 @@ class RequestLoggingMiddleware:
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        structlog.contextvars.bind_contextvars(request_id=str(uuid.uuid4()))
-        try:
+        if scope["type"] != "http":
             await self.app(scope, receive, send)
-        finally:
-            structlog.contextvars.clear_contextvars()
+            return
 
         status_code: int | None = None
 
@@ -34,16 +32,19 @@ class RequestLoggingMiddleware:
                 status_code = message["status"]
             await send(message)
 
-        await self.app(scope, receive, send_wrapper)
-
-        LOG.info(
-            "http_request",
-            method=scope["method"],
-            path=scope["path"],
-            query=scope.get("query_string", b"").decode("latin-1"),
-            content_type=_header(scope, b"content-type"),
-            status=status_code,
-        )
+        structlog.contextvars.bind_contextvars(request_id=str(uuid.uuid4()))
+        try:
+            await self.app(scope, receive, send_wrapper)
+        finally:
+            LOG.info(
+                "http_request",
+                method=scope["method"],
+                path=scope["path"],
+                query=scope.get("query_string", b"").decode("latin-1"),
+                content_type=_header(scope, b"content-type"),
+                status=status_code,
+            )
+            structlog.contextvars.clear_contextvars()
 
 
 def _header(scope: Scope, name: bytes) -> str | None:
