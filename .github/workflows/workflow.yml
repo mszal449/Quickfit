@@ -174,6 +174,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
 
@@ -185,14 +192,19 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
 
+      - name: Ensure namespace exists
+        run: kubectl create namespace quickfit --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Apply prod secrets
         run: |
           kubectl create secret generic postgres-secret \
+            -n quickfit \
             --from-literal=POSTGRES_USER="${{ secrets.PROD_POSTGRES_USER }}" \
             --from-literal=POSTGRES_PASSWORD="${{ secrets.PROD_POSTGRES_PASSWORD }}" \
             --from-literal=POSTGRES_DB="${{ secrets.PROD_POSTGRES_DB }}" \
             --dry-run=client -o yaml | kubectl apply -f -
           kubectl create secret generic backend-secret \
+            -n quickfit \
             --from-literal=DB_URL="postgresql+asyncpg://${{ secrets.PROD_POSTGRES_USER }}:${{ secrets.PROD_POSTGRES_PASSWORD }}@postgres:5432/${{ secrets.PROD_POSTGRES_DB }}" \
             --from-literal=JWT_SECRET="${{ secrets.PROD_JWT_SECRET }}" \
             --from-literal=GOOGLE_CLIENT_ID="${{ secrets.PROD_GOOGLE_CLIENT_ID }}" \
@@ -203,13 +215,13 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Ensure database exists
-        run: kubectl apply -f k8s/base/postgres-statefulset.yaml
+        run: kubectl apply -n quickfit -f k8s/base/postgres-statefulset.yaml
 
       - name: Run migrations
         run: |
           SAFE_TAG=$(echo "${TAG}" | tr '.' '-')
-          kubectl delete job migrate-${SAFE_TAG} --ignore-not-found
-          cat <<EOF | kubectl apply -f -
+          kubectl delete job migrate-${SAFE_TAG} -n quickfit --ignore-not-found
+          cat <<EOF | kubectl apply -n quickfit -f -
           apiVersion: batch/v1
           kind: Job
           metadata:
@@ -227,7 +239,7 @@ jobs:
                       - secretRef:
                           name: backend-secret
           EOF
-          kubectl wait --for=condition=complete job/migrate-${SAFE_TAG} --timeout=120s
+          kubectl wait --for=condition=complete job/migrate-${SAFE_TAG} -n quickfit --timeout=120s
 
       - name: Deploy images
         working-directory: k8s/overlays/prod
@@ -235,9 +247,10 @@ jobs:
           kustomize edit set image \
             quickfit-api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${TAG} \
             quickfit-frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${TAG}
+            quickfit-worker=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WORKER }}:${TAG}
           kubectl apply -k .
 
       - name: Wait for rollout
         run: |
-          kubectl rollout status deployment/backend --timeout=120s
-          kubectl rollout status deployment/frontend --timeout=120s
+          kubectl rollout status deployment/backend -n quickfit --timeout=120s
+          kubectl rollout status deployment/frontend -n quickfit --timeout=120s

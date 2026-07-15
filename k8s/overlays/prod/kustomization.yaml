@@ -1,6 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: quickfit
+
 resources:
   - ../../base
 
@@ -21,20 +23,11 @@ patches:
       name: quickfit
     patch: |-
       - op: add
-        path: /metadata/annotations/cert-manager.io~1cluster-issuer
-        value: letsencrypt-prod
-      - op: add
         path: /spec/ingressClassName
-        value: nginx
+        value: traefik
       - op: replace
         path: /spec/rules/0/host
         value: gohtonomi.com
-      - op: add
-        path: /spec/tls
-        value:
-          - hosts:
-              - gohtonomi.com
-            secretName: quickfit-tls
 
   - target:
       kind: Deployment
