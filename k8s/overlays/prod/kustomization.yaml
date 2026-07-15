@@ -27,7 +27,7 @@ patches:
         value: traefik
       - op: replace
         path: /spec/rules/0/host
-        value: gohtonomi.com
+        value: quickfit.gohtonomi.com
 
   - target:
       kind: Deployment
