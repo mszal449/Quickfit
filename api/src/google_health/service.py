@@ -74,7 +74,7 @@ async def sync_user(db: AsyncSession, user_id: UUID) -> int:
 
         synced_count = 0
         matched = min(len(workout_to_sync), len(datapoints_to_sync))
-        for workout_log, datapoint in zip(workout_to_sync, datapoints_to_sync):
+        for workout_log, datapoint in zip(workout_to_sync, datapoints_to_sync, strict=False):
             summary = workout_summary(workout_log.sets)
             existing_notes = datapoint.exercise.notes
             notes = f"{existing_notes}\n\n{summary}" if existing_notes else summary
