@@ -48,6 +48,10 @@ tasks:
 
   # -------------- BACKEND --------------
 
+  test-backend:
+    desc: "Run unit + integration tests in Docker"
+    deps: [test-unit-backend, test-integration-backend]
+
   test-unit-backend:
     desc: "Runs pytest unit tests for backend"
     dir: "api"
@@ -60,10 +64,6 @@ tasks:
       - docker compose -f compose.test.yaml down -v
       - docker compose -f compose.test.yaml run --rm --build integration-tests
       - docker compose -f compose.test.yaml down -v
-
-  test-backend:
-    desc: "Run unit + integration tests in Docker"
-    deps: [test-unit-backend, test-integration-backend]
 
   add-migration:
     desc: "Creates alembic migration of a given name"

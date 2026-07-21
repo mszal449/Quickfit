@@ -1,20 +1,22 @@
 import secrets
 from datetime import UTC, datetime, timedelta
 
+import pytest
 import pytest_asyncio
 import respx
-from fastapi import status
-from httpx import AsyncClient
+from fastapi import FastAPI, status
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from common.exceptions import NotFoundError
 from google_health.const import (
     GOOGLE_DATA_POINTS_URL,
     GOOGLE_HEALTH_API_URL,
     GOOGLE_TOKEN_URL,
 )
 from google_health.google_client import STRENGTH_TRAINING_EXERCISE_TYPE
-from google_health.service import sync_user
+from google_health.service import sync_user, users_to_sync
 from google_health.util import decrypt_token, encrypt_token
 from models.exercise import Exercise, ExerciseCategory
 from models.integration import Integration, IntegrationProvider
@@ -24,6 +26,8 @@ from models.workout_log import WorkoutLog, WorkoutLogStatus
 
 CALLBACK_URL = "/api/integrations/google-health/google/callback"
 WORKOUTS_URL = "/api/integrations/google-health/workouts"
+STATUS_URL = "/api/integrations/google-health/status"
+REVOKE_URL = "/api/integrations/google-health/revoke"
 DATAPOINTS_URL = f"{GOOGLE_HEALTH_API_URL}{GOOGLE_DATA_POINTS_URL}"
 
 
@@ -130,6 +134,75 @@ async def test_sync_matches_workouts_to_datapoints(
     assert list_route.called
     assert all(route.called for route in patch_routes)
     assert all(workout.sync_datapoint_name is not None for workout in workouts)
+
+
+async def test_status_reports_connected_integration(
+    client: AsyncClient, integration: Integration
+):
+    res = await client.get(STATUS_URL)
+
+    assert res.status_code == status.HTTP_200_OK
+    body = res.json()
+    assert body["connected"] is True
+    assert body["scope_granted"] == integration.scope_granted
+
+
+async def test_status_without_integration_reports_disconnected(client: AsyncClient):
+    res = await client.get(STATUS_URL)
+
+    assert res.status_code == status.HTTP_200_OK
+    assert res.json()["connected"] is False
+
+
+async def test_revoke_deletes_integration(
+    client: AsyncClient, db_session: AsyncSession, user: User, integration: Integration
+):
+    res = await client.delete(REVOKE_URL)
+
+    assert res.status_code == status.HTTP_204_NO_CONTENT
+    assert await _get_integration(db_session, user) is None
+
+
+async def test_revoke_without_integration_returns_not_found(client: AsyncClient):
+    res = await client.delete(REVOKE_URL)
+    assert res.status_code == status.HTTP_404_NOT_FOUND
+
+
+async def test_workouts_without_integration_returns_not_found(client: AsyncClient):
+    res = await client.get(WORKOUTS_URL)
+    assert res.status_code == status.HTTP_404_NOT_FOUND
+
+
+async def test_google_health_endpoints_require_auth(app: FastAPI):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        res = await ac.get(STATUS_URL)
+    assert res.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+async def test_users_to_sync_only_returns_connected_users_with_unsynced_workouts(
+    db_session: AsyncSession, user: User, other_user: User, integration: Integration
+):
+    await _example_workouts(db_session, user)
+    await _example_workouts(db_session, other_user)
+
+    assert await users_to_sync(db_session) == [user.id]
+
+
+async def test_sync_without_integration_raises_not_found(db_session: AsyncSession, user: User):
+    with pytest.raises(NotFoundError):
+        await sync_user(db_session, user.id)
+
+
+@respx.mock
+async def test_sync_without_workouts_does_nothing(
+    db_session: AsyncSession, user: User, integration: Integration
+):
+    token = _mock_token_endpoint()
+    list_route = respx.get(DATAPOINTS_URL).respond(json={"dataPoints": []})
+
+    assert await sync_user(db_session, user.id) == 0
+    assert not token.called
+    assert not list_route.called
 
 
 async def _example_workouts(db: AsyncSession, user: User) -> list[WorkoutLog]:

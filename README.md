@@ -39,64 +39,77 @@ The training tracker that replaces my Google Sheets.
 
 ## Overview
 
-QuickFit is a web app I built because I was sick of the Google Sheets mess I'd made for myself. It's a self-hosted workout tracker for planning training, logging sessions, sharing plans with others, and (soon) Google Health integration.
+QuickFit is a self-hosted workout tracker: plan your training, log sessions from your phone at the gym, and share plans with other people. I built it because I was sick of the Google Sheets mess I'd made for myself.
 
-The project was mainly built as an exercise to learn new technologies and practices - not just to ship a tracker, but to build it "properly" end to end: real auth, a real deployment story, a real CI/CD pipeline.
+<div align="center">
 
-**Overall**:
+| Dashboard | Logging a session | Session complete |
+|:---:|:---:|:---:|
+| <img src="public/IMG_0057.PNG" alt="Dashboard" width="240" /> | <img src="public/IMG_0058.PNG" alt="Logging a session" width="240" /> | <img src="public/IMG_0062.PNG" alt="Session complete" width="240" /> |
 
-- **Kubernetes deployment** - how often do you get to build a K8s app from the ground up? `k3s` in prod (Traefik ingress, local-path storage), `minikube` locally, both driven from the same Kustomize `base` + `overlays/{local,prod}` so environments stay in sync instead of drifting.
-- **Docker** - every push builds, lints, tests, and (on a tag) pushes images to `ghcr.io` and rolls out to prod automatically.
-- **OpenAPI** - the frontend never hand-writes API types or calls. Orval generates TanStack Query hooks straight from the backend's OpenAPI spec, so the two stay in sync for free. Love this approach 😇
-- **Taskfile** - my Makefile replacement; every dev/lint/test/deploy command in one place (`task dev`, `task lint`, `task test-backend`, `task k8s-local`, ...).
+**Plan builder (desktop)**
 
-**Kubernetes**:
+<img src="public/IMG_0063.PNG" alt="Plan builder" width="820" />
 
-- **Two clusters, one set of manifests** - `k3s` on a DigitalOcean cluster for prod, `minikube` locally for testing, both built from the same `k8s/base` and diverging only through Kustomize overlays (ingress class, image tag, replica count, resources).
+</div>
+
+## Features
+
+- Exercise library with per-exercise history, so you can see how a lift has progressed over time
+- Training plan builder (sessions, sets, reps, rest periods, ...)
+- Workout logging, including in-progress sessions you can pick back up and finish later
+- Share a plan with another user; they log their own progress against it
+- Set a default plan per user, whether it's your own or one shared with you
+- Google Health integration - connect your account via OAuth, pull workout data in and push completed QuickFit sessions back out
+
+## Tech & why
+
+Built as much to learn as to ship: not just a tracker, but a "properly" built app end to end - real auth, a real deployment story, a real CI/CD pipeline.
+
+| | |
+|---|---|
+| **Kubernetes** | Same Kustomize manifests deploy to `k3s` on my home server and `minikube` locally - no environment drift |
+| **Cloudflare Tunnel** | The home server is exposed to the internet without opening a single port or renting a VPS |
+| **Docker + GitHub Actions** | Every push builds, lints and tests; every tag pushes images to `ghcr.io` and rolls out to prod |
+| **FastAPI** | Async Python API with dependency injection, JWT auth and a resource-first layout |
+| **PostgreSQL + SQLAlchemy + Alembic** | Async SQL stack with versioned migrations, run as a K8s `Job` on deploy |
+| **OpenAPI + Orval** | Frontend API types and hooks are generated from the backend spec - the two can't drift |
+| **React + TypeScript + Tailwind** | Boring-in-a-good-way frontend, responsive for phone (gym) and desktop (planning) |
+| **TanStack Query** | Server state, caching and auth handling without the boilerplate |
+| **Taskfile** | One entry point for every dev/lint/test/deploy command (`task dev`, `task lint`, `task k8s-local`) |
+
+## Implementation notes
+
+<details>
+<summary><b>Kubernetes &amp; CI/CD</b></summary>
+
+- **Two clusters, one set of manifests** - `k3s` on my home server for prod, `minikube` locally, both built from the same `k8s/base` and diverging only through Kustomize overlays (ingress class, image tag, replica count, resources).
+- **Self-hosted, publicly reachable** - a Cloudflare Tunnel fronts the cluster's ingress, so the app is available on a real domain with TLS while the home network stays closed to inbound traffic.
 - **Postgres in-cluster** - a `StatefulSet` + PVC (`local-path`) instead of a managed database, specifically to get hands-on with StatefulSets, PVCs, and a headless service — the kind of thing a managed DB would have hidden from me.
 - **CI/CD-driven rollout** - GitHub Actions builds and pushes images on every push, then on a tag push: applies k8s secrets from GitHub Secrets, runs Alembic migrations as a one-off `Job`, patches the image tag with `kustomize edit set image`, and waits on the rollout.
 - **Secrets** - plain k8s `Secret`s created from GitHub Secrets in the pipeline (or from a local untracked `.env` for `minikube`) — simplest option that's still safe enough at this scale.
 
-**Backend:**
+</details>
 
-- **FastAPI** - used to learn dependency injection, JWT auth, `structlog`, and a resource-first project layout (`auth/`, `plan/`, `exercise/`, ... each owning its own router/schema/service) based on [zhanymkanov/fastapi-best-practices](https://github.com/zhanymkanov/fastapi-best-practices), rather than the classic layered `routers/`, `schemas/`, `services/` split.
-- **SQLAlchemy, Pydantic, Alembic** - standard async SQL stack for models, validation, and migrations.
-- **OpenAPI** - the spec is generated straight from the SQLAlchemy models and Pydantic schemas, no hand-written spec to keep in sync.
+<details>
+<summary><b>Backend</b></summary>
+
+- **Project layout** - resource-first (`auth/`, `plan/`, `exercise/`, ... each owning its own router/schema/service) following [zhanymkanov/fastapi-best-practices](https://github.com/zhanymkanov/fastapi-best-practices), rather than the classic layered `routers/`, `schemas/`, `services/` split.
 - **Auth** - JWT access + refresh tokens in httpOnly cookies (stateless access token, stateful/revocable refresh token) plus Google OAuth 2.0 login.
-- **Docker Compose** - spins up a real Postgres for integration tests instead of mocking the database.
-- **Ruff** - my favorite Python linter and formatter.
-- **uv** - package manager, used here as an experiment.
+- **OpenAPI** - the spec is generated straight from the SQLAlchemy models and Pydantic schemas, no hand-written spec to keep in sync.
+- **Testing** - Docker Compose spins up a real Postgres for integration tests instead of mocking the database.
+- **Tooling** - `structlog` for structured logs, Ruff for linting and formatting, `uv` as the package manager.
 
-**Frontend**:
+</details>
 
-- **React, TypeScript, Tailwind** - established, boring-in-a-good-way frontend stack.
+<details>
+<summary><b>Frontend</b></summary>
+
+- **Generated API layer** - Orval turns the backend's OpenAPI spec into typed TanStack Query hooks; no hand-written fetch calls or API types anywhere.
+- **Responsive by default** - one codebase for mobile (logging workouts at the gym) and desktop (building plans on a bigger screen) — see the screenshots above.
 - **UI** - designed and implemented with the help of Claude Code (I'm no designer at all).
-- **TanStack Query** - paired with Orval-generated hooks to make backend integration simple and clean; also my favorite way to handle auth state and API calls without writing much boilerplate.
-- **Vite** - dev server and build tool.
-- **Responsive** - one codebase for mobile (logging workouts at the gym) and desktop (building plans at a bigger screen) — see the screenshots below.
 
-## Features
-
-- Exercise library
-- Training plan builder (sessions, sets, reps, rest periods, ...)
-- Workout logging, including in-progress sessions you can pick back up and finish later
-- Share a plan with another user; they log their own progress against it, and (soon) you can see how they're doing
-- Set a default plan per user, whether it's your own or one shared with you
-
-**Incoming:**
-
-- Progress analytics (volume per muscle group, PRs, exercise history over time)
-- Google Health / Fitbit integration (read recovery metrics, write completed sessions)
-
-## Screenshots
-
-| Dashboard | Logging a session | Session complete |
-|---|---|---|
-| ![Dashboard](public/IMG_0057.PNG) | ![Logging a session](public/IMG_0058.PNG) | ![Session complete](public/IMG_0062.PNG) |
-
-**Plan builder (desktop)**
-
-![Plan builder](public/IMG_0063.PNG)
+</details>
 
 ## Project Structure
 
@@ -114,11 +127,6 @@ quickfit/
 ├── context/        # planning docs (auth, k8s, product context)
 └── Taskfile.yml    # dev/lint/test/deploy commands
 ```
-
-## Roadmap
-
-- [ ] Progress analytics
-- [ ] Google Health / Fitbit integration
 
 ## License
 MIT — see [LICENSE](LICENSE).
